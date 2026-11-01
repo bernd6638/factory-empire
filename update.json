@@ -1,11 +1,23 @@
 {
- "version": "2.15.1",
+ "version": "2.15.2",
  "runtime": 1,
- "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.15.1.zip",
- "sha256": "162499c6346af0edd640f42e9c6a5b97d1c3c3f8ef50d74a584400611552d84c",
- "size": 7442946,
+ "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.15.2.zip",
+ "sha256": "d7f429b0b8b0cc760f66839307a847acf922b99f612d9264d995b021dd613b29",
+ "size": 7443789,
  "download_page": "https://github.com/bernd6638/factory-empire",
  "notes": [
+  [
+   "2.15.2",
+   [
+    "Kleine Verbesserungen und Fehlerbehebungen"
+   ]
+  ],
+  [
+   "2.15.2",
+   [
+    "Kleine Verbesserungen und Fehlerbehebungen"
+   ]
+  ],
   [
    "2.15.1",
    [
@@ -48,20 +60,6 @@
    [
     "Weitere Vorbereitungen für das große Update – nur noch wenige Tage bis zum Ende des Countdowns!",
     "Kleine Verbesserungen und Fehlerbehebungen"
-   ]
-  ],
-  [
-   "2.10.0",
-   [
-    "Hinter den Kulissen: Alles ist bereit für das große Update – der Countdown läuft weiter …",
-    "Kleine Verbesserungen und Fehlerbehebungen"
-   ]
-  ],
-  [
-   "2.9.3",
-   [
-    "Sprachauswahl: Spiele auf Deutsch, Englisch, Französisch, Spanisch, Italienisch, Portugiesisch, Polnisch, Türkisch oder Russisch – unter Optionen » Sprache, wechselt sofort",
-    "Lautstärke in 1-%-Schritten: Musik, Umgebung und Effekte lassen sich jetzt ganz fein einstellen, z. B. auf 2 % – auch mit dem Mausrad über dem Regler"
    ]
   ]
  ]
