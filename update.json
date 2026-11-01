@@ -1,11 +1,20 @@
 {
- "version": "2.9.1",
+ "version": "2.9.2",
  "runtime": 1,
- "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.9.1.zip",
- "sha256": "50282f35700efa341e1c3fa59392916ce20bda8404326ba7c104e5a6f9da1d39",
- "size": 4020011,
+ "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.9.2.zip",
+ "sha256": "60a5109544eac23ee3166f5d066b10f5a48276d31f685a682ceec5c924d86cfe",
+ "size": 6254198,
  "download_page": "https://github.com/bernd6638/factory-empire",
  "notes": [
+  [
+   "2.9.2",
+   [
+    "Hintergrundmusik: Zwei entspannte Musikstücke laufen im Wechsel – im Menü und im Spiel",
+    "Vogelgezwitscher: Amseln, Meisen und Finken zwitschern mal links, mal rechts aus dem Wald",
+    "Wind und Fabrikgeräusche: Leiser Wind in den Bäumen, je mehr Maschinen laufen, desto lauter brummt und klackert die Fabrik",
+    "Neue Regler: Musik und Umgebung lassen sich unter Optionen getrennt einstellen"
+   ]
+  ],
   [
    "2.9.1",
    [
