@@ -17,7 +17,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ROLE_ID = "1324453801033465917"
 
 
-EMOJIS = [("förderband", "⚙️"), ("kurve", "⚙️"), ("chat", "💬"), ("grafik", "🎨"), ("beleucht", "🎨"),
+EMOJIS = [("musik", "🎵"), ("vogel", "🐦"), ("wind", "🌬️"), ("geräusch", "🔊"), ("sound", "🔊"),
+          ("regler", "🎚️"), ("einstell", "🎚️"), ("förderband", "⚙️"), ("kurve", "⚙️"), ("chat", "💬"), ("grafik", "🎨"), ("beleucht", "🎨"),
           ("baustelle", "🚧"), ("countdown", "⏳"), ("auftr", "🚚"), ("lkw", "🚚"), ("discord", "🎮"),
           ("update", "🔄"), ("statistik", "📊"), ("erfolg", "🏆"), ("wald", "🌲"), ("fps", "⚡"),
           ("fehler", "🛠️"), ("bug", "🛠️"), ("mehrspieler", "👥"), ("welt", "🌍")]
