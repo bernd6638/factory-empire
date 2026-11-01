@@ -1,11 +1,24 @@
 {
- "version": "2.15.3",
+ "version": "2.16.0",
  "runtime": 1,
- "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.15.3.zip",
- "sha256": "58948aef16afd2710d5eda0273cadd69b78decbb98c8f450b72f4861562d9242",
- "size": 7444718,
+ "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.16.0.zip",
+ "sha256": "94530ef21050356f699bcf9e8013d7b3fa1bdc48e3dfb3f004e786543eff5607",
+ "size": 7487305,
  "download_page": "https://github.com/bernd6638/factory-empire",
  "notes": [
+  [
+   "2.16.0",
+   [
+    "Shop & Skins (K): Skins für alles, was man bauen kann – bezahlt mit Erfolgspunkten (selten 7, superselten 15, episch 23, legendär 50)",
+    "Accounts: Leg im Shop unter „Konto“ einen Account auf dem Server an – damit kannst du Skins auch an andere verschenken",
+    "Tägliches Glücksrad: einmal am Tag drehen und einen Gratis-Skin oder Geld für die Firma gewinnen",
+    "Blueprints (B): Speichere deine Fabrik als Bauplan und bau sie in neuen Welten nach – ein grauer Schatten zeigt, was wohin gehört",
+    "Förderbänder: Kurven an Splittern und ein T-Stück-Look, wenn ein Band von der Seite einläuft – schwebende Waren behoben",
+    "Frachtbahnhof mit eigenem Lager: Waren werden für spätere Aufträge eingelagert, jede Ausbaustufe bringt mehr Platz",
+    "Schilder über Maschinen zeigen, was dort hergestellt wird (abschaltbar unter Optionen » Anzeige)",
+    "Mehr FPS in großen Fabriken und der Kamera-Einflug beim Betreten einer Welt funktioniert wieder"
+   ]
+  ],
   [
    "2.15.3",
    [
@@ -53,12 +66,6 @@
     "Einstellungen neu sortiert: Reiter für Anzeige, Leistung, Audio und Steuerung",
     "Tastenbelegung: Unter Optionen » Steuerung legst du jede Taste selbst fest",
     "Eigener Lautstärkeregler für den Erfolgs-Sound (mit Test-Knopf)"
-   ]
-  ],
-  [
-   "2.12.0",
-   [
-    "Kleine Verbesserungen und Fehlerbehebungen"
    ]
   ]
  ]
