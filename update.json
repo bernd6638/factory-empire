@@ -1,11 +1,17 @@
 {
- "version": "2.15.2",
+ "version": "2.15.3",
  "runtime": 1,
- "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.15.2.zip",
- "sha256": "d7f429b0b8b0cc760f66839307a847acf922b99f612d9264d995b021dd613b29",
- "size": 7443789,
+ "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.15.3.zip",
+ "sha256": "58948aef16afd2710d5eda0273cadd69b78decbb98c8f450b72f4861562d9242",
+ "size": 7444718,
  "download_page": "https://github.com/bernd6638/factory-empire",
  "notes": [
+  [
+   "2.15.3",
+   [
+    "Kleine Verbesserungen und Fehlerbehebungen"
+   ]
+  ],
   [
    "2.15.2",
    [
@@ -52,13 +58,6 @@
   [
    "2.12.0",
    [
-    "Kleine Verbesserungen und Fehlerbehebungen"
-   ]
-  ],
-  [
-   "2.11.0",
-   [
-    "Weitere Vorbereitungen für das große Update – nur noch wenige Tage bis zum Ende des Countdowns!",
     "Kleine Verbesserungen und Fehlerbehebungen"
    ]
   ]
