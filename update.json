@@ -1,11 +1,17 @@
 {
- "version": "2.11.0",
+ "version": "2.12.0",
  "runtime": 1,
- "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.11.0.zip",
- "sha256": "b5f76ed55bed8441a81a40f04ef091503e4a7b3fde38e4a0d87860d018b418f4",
- "size": 7383846,
+ "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.12.0.zip",
+ "sha256": "7b3904cd7fb8edc246a40e86cab263e4bde5fe082339669179b5c121ab0812cb",
+ "size": 7384301,
  "download_page": "https://github.com/bernd6638/factory-empire",
  "notes": [
+  [
+   "2.12.0",
+   [
+    "Kleine Verbesserungen und Fehlerbehebungen"
+   ]
+  ],
   [
    "2.11.0",
    [
@@ -57,15 +63,6 @@
    [
     "Discord-Status: Discord zeigt „Spielt Factory Empire“ mit Logo, Spielmodus, Geld und Spielzeit",
     "Abschaltbar unter Optionen » „Status in Discord zeigen“"
-   ]
-  ],
-  [
-   "2.8.0",
-   [
-    "Aufträge (O): Städte bestellen Waren, LKW liefern sie gegen hohe Belohnungen",
-    "Neues Gebäude Frachtbahnhof mit LKW, Speditions-Ruf und Forschung „Autobahnanbindung“",
-    "Dichter Wald bis zum Horizont, Dunst in der Ferne und eine Landstraße mit Verkehr",
-    "Statistiken & 15 Erfolge im Hauptmenü"
    ]
   ]
  ]
