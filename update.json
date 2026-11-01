@@ -1,11 +1,20 @@
 {
- "version": "2.12.0",
+ "version": "2.13.0",
  "runtime": 1,
- "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.12.0.zip",
- "sha256": "7b3904cd7fb8edc246a40e86cab263e4bde5fe082339669179b5c121ab0812cb",
- "size": 7384301,
+ "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.13.0.zip",
+ "sha256": "739f6841acd4841966168f003ad96ca8d67be96799f2a907a4b70bd350c5a578",
+ "size": 7426357,
  "download_page": "https://github.com/bernd6638/factory-empire",
  "notes": [
+  [
+   "2.13.0",
+   [
+    "13 neue Erfolge: zum Beispiel „Deine erste große Fabrik“ für 10 Großfabriken – mit eigenem Erfolgs-Sound",
+    "Einstellungen neu sortiert: Reiter für Anzeige, Leistung, Audio und Steuerung",
+    "Tastenbelegung: Unter Optionen » Steuerung legst du jede Taste selbst fest",
+    "Eigener Lautstärkeregler für den Erfolgs-Sound (mit Test-Knopf)"
+   ]
+  ],
   [
    "2.12.0",
    [
@@ -56,13 +65,6 @@
    [
     "Automatische Updates: Neue Versionen werden direkt im Spiel heruntergeladen – kein neuer Download nötig",
     "Nach jedem Update zeigt dieses Fenster, was neu ist"
-   ]
-  ],
-  [
-   "2.8.1",
-   [
-    "Discord-Status: Discord zeigt „Spielt Factory Empire“ mit Logo, Spielmodus, Geld und Spielzeit",
-    "Abschaltbar unter Optionen » „Status in Discord zeigen“"
    ]
   ]
  ]
