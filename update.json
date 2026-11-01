@@ -1,11 +1,18 @@
 {
- "version": "2.16.0",
+ "version": "2.16.1",
  "runtime": 1,
- "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.16.0.zip",
- "sha256": "94530ef21050356f699bcf9e8013d7b3fa1bdc48e3dfb3f004e786543eff5607",
- "size": 7487305,
+ "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.16.1.zip",
+ "sha256": "e8c899484a125ea3de01ee2f251adfcedd53a98efe9ed019072714210151d49a",
+ "size": 7488355,
  "download_page": "https://github.com/bernd6638/factory-empire",
  "notes": [
+  [
+   "2.16.1",
+   [
+    "Skins gibt es jetzt nur noch für Erfolgspunkte: 1 Erfolg = 1 Punkt (selten 7, superselten 15, episch 23, legendär 50)",
+    "Kleine Verbesserungen und Fehlerbehebungen"
+   ]
+  ],
   [
    "2.16.0",
    [
@@ -57,15 +64,6 @@
    [
     "Live-Updates: Neue Versionen werden jetzt auch mitten im Spiel gefunden – oben rechts erscheint „Update verfügbar“",
     "Ein Klick lädt das Update im Hintergrund, danach lädt das Spiel kurz neu und du bist sofort wieder in deiner Welt"
-   ]
-  ],
-  [
-   "2.13.0",
-   [
-    "13 neue Erfolge: zum Beispiel „Deine erste große Fabrik“ für 10 Großfabriken – mit eigenem Erfolgs-Sound",
-    "Einstellungen neu sortiert: Reiter für Anzeige, Leistung, Audio und Steuerung",
-    "Tastenbelegung: Unter Optionen » Steuerung legst du jede Taste selbst fest",
-    "Eigener Lautstärkeregler für den Erfolgs-Sound (mit Test-Knopf)"
    ]
   ]
  ]
