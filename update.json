@@ -1,11 +1,17 @@
 {
- "version": "2.16.1",
+ "version": "2.16.2",
  "runtime": 1,
- "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.16.1.zip",
- "sha256": "e8c899484a125ea3de01ee2f251adfcedd53a98efe9ed019072714210151d49a",
- "size": 7488355,
+ "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.16.2.zip",
+ "sha256": "72aa0a52e0f879066609a78c3ad3dcc2a2a01f937c9227f568fb5840f1e35c2c",
+ "size": 7490803,
  "download_page": "https://github.com/bernd6638/factory-empire",
  "notes": [
+  [
+   "2.16.2",
+   [
+    "Fenstergröße einstellbar (Optionen » Anzeige) – „Automatisch“ passt das Fenster an deinen Bildschirm an, z. B. auf dem MacBook"
+   ]
+  ],
   [
    "2.16.1",
    [
@@ -57,13 +63,6 @@
     "Neues Design: Alle Anzeigen im Glas-Look mit Leuchtkanten, Schatten und schöneren Symbolleisten",
     "Die Karte unten links ist komplett neu: schärfer, mit Erz-Feldern, Gebäuden, Förderband-Richtungen und deinem Sichtfeld",
     "Auf der Karte siehst du jetzt, wohin du schaust, und die Koordinaten unter der Maus – ein Klick fährt direkt dorthin"
-   ]
-  ],
-  [
-   "2.14.0",
-   [
-    "Live-Updates: Neue Versionen werden jetzt auch mitten im Spiel gefunden – oben rechts erscheint „Update verfügbar“",
-    "Ein Klick lädt das Update im Hintergrund, danach lädt das Spiel kurz neu und du bist sofort wieder in deiner Welt"
    ]
   ]
  ]
