@@ -18,4 +18,5 @@ jobs:
       - name: Nachricht senden
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_ROLE_ID: ${{ vars.DISCORD_ROLE_ID }}
         run: python tools/discord_notify.py

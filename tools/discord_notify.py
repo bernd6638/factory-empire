@@ -10,6 +10,9 @@ import sys
 import urllib.request
 
 REPO_RAW = "https://raw.githubusercontent.com/bernd6638/factory-empire/main"
+# Rolle, die bei jedem Update gepingt wird: Rollen-ID (Zahl), "everyone" oder leer = niemand.
+# Kann auch über die GitHub-Variable DISCORD_ROLE_ID gesetzt werden.
+ROLE_ID = ""
 
 
 def build_message(info):
@@ -32,8 +35,17 @@ def build_message(info):
     }
     if int(info.get("runtime", 1)) > 1 and info.get("download_page"):
         embed["description"] += f"\n⚠️ Diese Version braucht einen neuen Download: {info['download_page']}"
+    role = (os.environ.get("DISCORD_ROLE_ID") or ROLE_ID).strip()
+    content = "📢 **Neues Update verfügbar!**"
+    allowed = {"parse": []}
+    if role.lower() in ("everyone", "@everyone"):
+        content = "@everyone " + content
+        allowed = {"parse": ["everyone"]}
+    elif role.isdigit():
+        content = f"<@&{role}> " + content
+        allowed = {"roles": [role]}
     return {"username": "Factory Empire", "avatar_url": f"{REPO_RAW}/logo.png",
-            "content": "📢 **Neues Update verfügbar!**", "embeds": [embed]}
+            "content": content, "embeds": [embed], "allowed_mentions": allowed}
 
 
 def main():
