@@ -1,15 +1,22 @@
 {
- "version": "2.9.3",
+ "version": "2.10.0",
  "runtime": 1,
- "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.9.3.zip",
- "sha256": "84e7f267edb4e24d857a40d9fcac33dcccddbd7756d7d9414235472606730f20",
- "size": 6432981,
+ "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.10.0.zip",
+ "sha256": "aa5cf614d121e32490343d274814305b89024ed876430dfa9bbb0c3e615eeb68",
+ "size": 7109542,
  "download_page": "https://github.com/bernd6638/factory-empire",
  "notes": [
   [
+   "2.10.0",
+   [
+    "Hinter den Kulissen: Alles ist bereit für das große Update – der Countdown läuft weiter …",
+    "Kleine Verbesserungen und Fehlerbehebungen"
+   ]
+  ],
+  [
    "2.9.3",
    [
-    "Sprachauswahl: Spiele auf Deutsch, Englisch, Französisch, Spanisch, Italienisch, Portugiesisch, Polnisch, Türkisch oder Russisch – unter Optionen → Sprache, wechselt sofort",
+    "Sprachauswahl: Spiele auf Deutsch, Englisch, Französisch, Spanisch, Italienisch, Portugiesisch, Polnisch, Türkisch oder Russisch – unter Optionen » Sprache, wechselt sofort",
     "Lautstärke in 1-%-Schritten: Musik, Umgebung und Effekte lassen sich jetzt ganz fein einstellen, z. B. auf 2 % – auch mit dem Mausrad über dem Regler"
    ]
   ],
@@ -42,7 +49,7 @@
    "2.8.1",
    [
     "Discord-Status: Discord zeigt „Spielt Factory Empire“ mit Logo, Spielmodus, Geld und Spielzeit",
-    "Abschaltbar unter Optionen → „Status in Discord zeigen“"
+    "Abschaltbar unter Optionen » „Status in Discord zeigen“"
    ]
   ],
   [
@@ -59,15 +66,6 @@
    [
     "Fehler behoben, durch den man nichts mehr anklicken konnte",
     "Weniger Zeichenaufrufe: Rauch, Funken und Warnschilder gebündelt – mehr FPS"
-   ]
-  ],
-  [
-   "2.7.0",
-   [
-    "Rasen statt grauem Boden",
-    "Materialien auf Bändern auch weit herausgezoomt sichtbar",
-    "Eigener Mauszeiger im Vollbild (F11)",
-    "Mehrspieler mit 5 Welten-Plätzen"
    ]
   ]
  ]
