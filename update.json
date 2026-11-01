@@ -1,11 +1,20 @@
 {
- "version": "2.9.0",
+ "version": "2.9.1",
  "runtime": 1,
- "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.9.0.zip",
- "sha256": "0b576314f883b5bf9989273da2434cc28ef9db22c85c774a23843a9c054c8e05",
- "size": 4012318,
+ "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.9.1.zip",
+ "sha256": "50282f35700efa341e1c3fa59392916ce20bda8404326ba7c104e5a6f9da1d39",
+ "size": 4020011,
  "download_page": "https://github.com/bernd6638/factory-empire",
  "notes": [
+  [
+   "2.9.1",
+   [
+    "Förderbänder machen jetzt schöne Kurven, wenn sie um die Ecke gehen – die Waren fahren den Bogen entlang",
+    "Chat: T drücken, Nachricht schreiben, Enter – mit Verlauf und Spielerfarben",
+    "Realistischere Beleuchtung: Himmelslicht, Glanzlichter und kräftigere Farben",
+    "Geheimnisvolle Baustelle vor der Nordwest-Ecke – mit Countdown bis zum nächsten großen Update …"
+   ]
+  ],
   [
    "2.9.0",
    [
