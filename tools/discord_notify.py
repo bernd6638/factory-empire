@@ -12,7 +12,7 @@ import urllib.request
 REPO_RAW = "https://raw.githubusercontent.com/bernd6638/factory-empire/main"
 # Rolle, die bei jedem Update gepingt wird: Rollen-ID (Zahl), "everyone" oder leer = niemand.
 # Kann auch über die GitHub-Variable DISCORD_ROLE_ID gesetzt werden.
-ROLE_ID = ""
+ROLE_ID = "1324453801033465917"
 
 
 def build_message(info):
