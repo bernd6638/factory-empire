@@ -15,7 +15,7 @@ REPO = "bernd6638/factory-empire"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Rolle, die bei jedem Update gepingt wird: Rollen-ID (Zahl), "everyone" oder leer = niemand.
 # Kann auch über die GitHub-Variable DISCORD_ROLE_ID gesetzt werden.
-ROLE_ID = "1324453801033465917"
+ROLE_ID = "everyone"
 
 
 EMOJIS = [("musik", "🎵"), ("vogel", "🐦"), ("wind", "🌬️"), ("geräusch", "🔊"), ("sound", "🔊"),
