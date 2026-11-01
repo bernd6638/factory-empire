@@ -1,11 +1,18 @@
 {
- "version": "2.15.0",
+ "version": "2.15.1",
  "runtime": 1,
- "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.15.0.zip",
- "sha256": "0f65950a37326f523d1ecc898b77912c7e3907f5026c77316fc8eeb2e5ce9003",
- "size": 7441001,
+ "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.15.1.zip",
+ "sha256": "162499c6346af0edd640f42e9c6a5b97d1c3c3f8ef50d74a584400611552d84c",
+ "size": 7442946,
  "download_page": "https://github.com/bernd6638/factory-empire",
  "notes": [
+  [
+   "2.15.1",
+   [
+    "Karte: Der weiße Rahmen ist weg – der orange Pfeil zeigt deine Position und Blickrichtung",
+    "Neue Updates erscheinen im Spiel jetzt schon nach etwa einer Minute oben rechts (vorher konnte es bis zu 7 Minuten dauern)"
+   ]
+  ],
   [
    "2.15.0",
    [
@@ -55,15 +62,6 @@
    [
     "Sprachauswahl: Spiele auf Deutsch, Englisch, Französisch, Spanisch, Italienisch, Portugiesisch, Polnisch, Türkisch oder Russisch – unter Optionen » Sprache, wechselt sofort",
     "Lautstärke in 1-%-Schritten: Musik, Umgebung und Effekte lassen sich jetzt ganz fein einstellen, z. B. auf 2 % – auch mit dem Mausrad über dem Regler"
-   ]
-  ],
-  [
-   "2.9.2",
-   [
-    "Hintergrundmusik: Zwei entspannte Musikstücke laufen im Wechsel – im Menü und im Spiel",
-    "Vogelgezwitscher: Amseln, Meisen und Finken zwitschern mal links, mal rechts aus dem Wald",
-    "Wind und Fabrikgeräusche: Leiser Wind in den Bäumen, je mehr Maschinen laufen, desto lauter brummt und klackert die Fabrik",
-    "Neue Regler: Musik und Umgebung lassen sich unter Optionen getrennt einstellen"
    ]
   ]
  ]
