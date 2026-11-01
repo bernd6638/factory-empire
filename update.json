@@ -1,0 +1,49 @@
+{
+ "version": "2.9.0",
+ "runtime": 1,
+ "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.9.0.zip",
+ "sha256": "0b576314f883b5bf9989273da2434cc28ef9db22c85c774a23843a9c054c8e05",
+ "size": 4012318,
+ "download_page": "https://github.com/bernd6638/factory-empire",
+ "notes": [
+  [
+   "2.9.0",
+   [
+    "Automatische Updates: Neue Versionen werden direkt im Spiel heruntergeladen – kein neuer Download nötig",
+    "Nach jedem Update zeigt dieses Fenster, was neu ist"
+   ]
+  ],
+  [
+   "2.8.1",
+   [
+    "Discord-Status: Discord zeigt „Spielt Factory Empire“ mit Logo, Spielmodus, Geld und Spielzeit",
+    "Abschaltbar unter Optionen → „Status in Discord zeigen“"
+   ]
+  ],
+  [
+   "2.8.0",
+   [
+    "Aufträge (O): Städte bestellen Waren, LKW liefern sie gegen hohe Belohnungen",
+    "Neues Gebäude Frachtbahnhof mit LKW, Speditions-Ruf und Forschung „Autobahnanbindung“",
+    "Dichter Wald bis zum Horizont, Dunst in der Ferne und eine Landstraße mit Verkehr",
+    "Statistiken & 15 Erfolge im Hauptmenü"
+   ]
+  ],
+  [
+   "2.7.1",
+   [
+    "Fehler behoben, durch den man nichts mehr anklicken konnte",
+    "Weniger Zeichenaufrufe: Rauch, Funken und Warnschilder gebündelt – mehr FPS"
+   ]
+  ],
+  [
+   "2.7.0",
+   [
+    "Rasen statt grauem Boden",
+    "Materialien auf Bändern auch weit herausgezoomt sichtbar",
+    "Eigener Mauszeiger im Vollbild (F11)",
+    "Mehrspieler mit 5 Welten-Plätzen"
+   ]
+  ]
+ ]
+}
