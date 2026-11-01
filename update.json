@@ -1,11 +1,18 @@
 {
- "version": "2.10.0",
+ "version": "2.11.0",
  "runtime": 1,
- "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.10.0.zip",
- "sha256": "aa5cf614d121e32490343d274814305b89024ed876430dfa9bbb0c3e615eeb68",
- "size": 7109542,
+ "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.11.0.zip",
+ "sha256": "b5f76ed55bed8441a81a40f04ef091503e4a7b3fde38e4a0d87860d018b418f4",
+ "size": 7383846,
  "download_page": "https://github.com/bernd6638/factory-empire",
  "notes": [
+  [
+   "2.11.0",
+   [
+    "Weitere Vorbereitungen für das große Update – nur noch wenige Tage bis zum Ende des Countdowns!",
+    "Kleine Verbesserungen und Fehlerbehebungen"
+   ]
+  ],
   [
    "2.10.0",
    [
@@ -60,14 +67,6 @@
     "Dichter Wald bis zum Horizont, Dunst in der Ferne und eine Landstraße mit Verkehr",
     "Statistiken & 15 Erfolge im Hauptmenü"
    ]
-  ],
-  [
-   "2.7.1",
-   [
-    "Fehler behoben, durch den man nichts mehr anklicken konnte",
-    "Weniger Zeichenaufrufe: Rauch, Funken und Warnschilder gebündelt – mehr FPS"
-   ]
   ]
- ],
- "announce": "2026-11-01"
+ ]
 }
