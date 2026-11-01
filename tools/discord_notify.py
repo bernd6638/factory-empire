@@ -16,36 +16,31 @@ ROLE_ID = "1324453801033465917"
 
 
 def build_message(info):
+    """Große Schrift über Discord-Überschriften (#, ##, ###) direkt in der Nachricht."""
     version = info["version"]
     notes = []
     for entry in info.get("notes", []):
         if entry[0] == version:
             notes = entry[1]
             break
-    lines = "\n".join(f"• {n}" for n in notes) or "Verbesserungen und Fehlerbehebungen."
-    embed = {
-        "title": f"🏭 Factory Empire {version} ist da!",
-        "description": (f"**Das ist neu:**\n{lines}\n\n"
-                        "🔄 **So bekommst du das Update:** Spiel starten und im Fenster "
-                        "**„Update verfügbar“** auf **„Jetzt aktualisieren“** klicken – fertig!\n"
-                        "💾 Deine Spielstände bleiben erhalten."),
-        "color": 0xFA9E28,
-        "thumbnail": {"url": f"{REPO_RAW}/logo.png"},
-        "footer": {"text": "Im Mehrspieler sollten alle dieselbe Version haben."},
-    }
+    lines = [f"# 🏭 Factory Empire {version} ist da!", "## ✨ Das ist neu:"]
+    lines += [f"### • {n}" for n in notes] or ["### • Verbesserungen und Fehlerbehebungen"]
+    lines += ["", "## 🔄 So bekommst du das Update:",
+              "### Spiel starten und im Fenster „Update verfügbar“ auf **„Jetzt aktualisieren“** klicken – fertig!",
+              "💾 Deine Spielstände bleiben erhalten.",
+              "-# Im Mehrspieler sollten alle dieselbe Version haben."]
     if int(info.get("runtime", 1)) > 1 and info.get("download_page"):
-        embed["description"] += f"\n⚠️ Diese Version braucht einen neuen Download: {info['download_page']}"
+        lines.insert(-1, f"⚠️ Diese Version braucht einen neuen Download: {info['download_page']}")
     role = (os.environ.get("DISCORD_ROLE_ID") or ROLE_ID).strip()
-    content = "📢 **Neues Update verfügbar!**"
     allowed = {"parse": []}
+    ping = ""
     if role.lower() in ("everyone", "@everyone"):
-        content = "@everyone " + content
-        allowed = {"parse": ["everyone"]}
+        ping, allowed = "@everyone", {"parse": ["everyone"]}
     elif role.isdigit():
-        content = f"<@&{role}> " + content
-        allowed = {"roles": [role]}
+        ping, allowed = f"<@&{role}>", {"roles": [role]}
+    content = (ping + "\n" if ping else "") + "\n".join(lines)
     return {"username": "Factory Empire", "avatar_url": f"{REPO_RAW}/logo.png",
-            "content": content, "embeds": [embed], "allowed_mentions": allowed}
+            "content": content[:1990], "allowed_mentions": allowed}
 
 
 def main():
