@@ -1,0 +1,39 @@
+# Lädt die Installer (vom Branch "installers") als GitHub-Release hoch, damit neue Spieler sie über
+# einen festen Link herunterladen können. Die Mac-Datei liegt in Teilen vor (GitHub erlaubt pro Datei
+# höchstens 100 MB im Repository) und wird hier wieder zusammengesetzt.
+name: Installer veröffentlichen
+
+on:
+  push:
+    branches: [installers]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: installers
+      - name: Dateien vorbereiten
+        run: |
+          set -e
+          VERSION="$(cat VERSION)"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          mkdir -p dist
+          cp "FactoryEmpire-Setup-v$VERSION.exe" dist/
+          cp "FactoryEmpire-Windows-v$VERSION.zip" dist/
+          cat mac_part_* > "dist/FactoryEmpire-macOS-v$VERSION.zip"
+          ls -la dist
+      - name: Release erstellen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          gh release delete "v$VERSION" --yes --cleanup-tag -R "$GITHUB_REPOSITORY" || true
+          gh release create "v$VERSION" dist/* -R "$GITHUB_REPOSITORY" --target main --latest \
+            --title "Factory Empire $VERSION" \
+            --notes "Installer für neue Spieler. Wer das Spiel schon hat, bekommt Updates automatisch im Spiel."

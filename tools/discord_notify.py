@@ -11,6 +11,7 @@ import sys
 import urllib.request
 
 REPO_RAW = "https://raw.githubusercontent.com/bernd6638/factory-empire/main"
+REPO = "bernd6638/factory-empire"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Rolle, die bei jedem Update gepingt wird: Rollen-ID (Zahl), "everyone" oder leer = niemand.
 # Kann auch über die GitHub-Variable DISCORD_ROLE_ID gesetzt werden.
@@ -36,6 +37,15 @@ def _field(note):
     return {"name": f"{emoji}  Neu", "value": note[:1000], "inline": False}
 
 
+def _exists(url):
+    try:
+        req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "FactoryEmpireBot"})
+        with urllib.request.urlopen(req, timeout=15) as r:
+            return r.status < 400
+    except Exception:
+        return False
+
+
 def build_message(info):
     version = info["version"]
     notes = []
@@ -47,6 +57,14 @@ def build_message(info):
     fields.append({"name": "\u200b", "value": "**🔄 So bekommst du das Update:**\n"
                    "Spiel starten  ➜  **„Jetzt aktualisieren“**  ➜  fertig!\n"
                    "💾 Deine Spielstände bleiben erhalten.", "inline": False})
+    dl = f"https://github.com/{REPO}/releases/download/v{version}/"
+    if _exists(dl + f"FactoryEmpire-Setup-v{version}.exe"):
+        links = (f"🪟 **[Windows-Installer (Setup.exe)]({dl}FactoryEmpire-Setup-v{version}.exe)**\n"
+                 f"📦 [Windows als ZIP]({dl}FactoryEmpire-Windows-v{version}.zip)   ·   "
+                 f"🍎 [Mac]({dl}FactoryEmpire-macOS-v{version}.zip)")
+    else:
+        links = f"🪟 🍎 **[Hier herunterladen](https://github.com/{REPO}/releases/latest)**"
+    fields.append({"name": "📥 Neu dabei? Spiel herunterladen:", "value": links, "inline": False})
     embed = {
         "author": {"name": "FACTORY EMPIRE  ·  PATCH NOTES", "icon_url": f"{REPO_RAW}/logo.png"},
         "title": f"✨ Das ist neu in Version {version}",
