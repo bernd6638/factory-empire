@@ -1,11 +1,26 @@
 {
- "version": "2.16.2",
+ "version": "2.17.0",
  "runtime": 1,
- "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.16.2.zip",
- "sha256": "72aa0a52e0f879066609a78c3ad3dcc2a2a01f937c9227f568fb5840f1e35c2c",
- "size": 7490803,
+ "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.17.0.zip",
+ "sha256": "b6496e6202c2d554d82e68b830ba74e2fb78fbbdc00eb3adc50921e8c8106afd",
+ "size": 8521908,
  "download_page": "https://github.com/bernd6638/factory-empire",
  "notes": [
+  [
+   "2.17.0",
+   [
+    "Umgebung wählbar (Optionen » Anzeige): Wald, Stadt, Baustelle oder Winter – jede mit eigener Landschaft und eigenen Geräuschen",
+    "Tageszeit einstellbar: Tag, Abend, Nacht oder ein echter Tageszyklus – nachts leuchten Lampen, Fenster und Sterne",
+    "Viel schönere Umgebung rund um die Fabrik und eine neue Geräuschkulisse (Stadtverkehr, Baustelle, Eulen in der Nacht)",
+    "24 neue zweifarbige Skins statt einfacher Tönung – legendäre Skins funkeln",
+    "Kisten im Shop: Für Erfolgspunkte eine Kiste öffnen und einen Skin ziehen – doppelte Skins geben die Hälfte der Punkte zurück",
+    "Das Glücksrad ist jetzt genau: Du bekommst immer das Feld, auf das der Zeiger zeigt",
+    "Ausbau bis Stufe 5 – jetzt auch für Förderbänder, Splitter, T-Stücke und Sortierer (Shift+U baut alle gleichen Gebäude aus)",
+    "Bis zu 3 Forschungen gleichzeitig: weitere Forschungs-Slots im Forschungsfenster kaufen – plus 7 neue Upgrades im Forschungsbaum",
+    "Geschützte Spielernamen: Hat ein Name einen Account auf dem Server, kann ihn kein anderer mehr benutzen",
+    "FPS-Begrenzer repariert: 120 FPS sind jetzt Standard und funktionieren wirklich"
+   ]
+  ],
   [
    "2.16.2",
    [
@@ -55,14 +70,6 @@
    [
     "Karte: Der weiße Rahmen ist weg – der orange Pfeil zeigt deine Position und Blickrichtung",
     "Neue Updates erscheinen im Spiel jetzt schon nach etwa einer Minute oben rechts (vorher konnte es bis zu 7 Minuten dauern)"
-   ]
-  ],
-  [
-   "2.15.0",
-   [
-    "Neues Design: Alle Anzeigen im Glas-Look mit Leuchtkanten, Schatten und schöneren Symbolleisten",
-    "Die Karte unten links ist komplett neu: schärfer, mit Erz-Feldern, Gebäuden, Förderband-Richtungen und deinem Sichtfeld",
-    "Auf der Karte siehst du jetzt, wohin du schaust, und die Koordinaten unter der Maus – ein Klick fährt direkt dorthin"
    ]
   ]
  ]
