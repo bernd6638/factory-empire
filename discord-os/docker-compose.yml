@@ -1,5 +1,7 @@
-# Startet PostgreSQL und Redis für Discord OS.
-# Nutzung: docker compose up -d
+# Discord OS – Docker Compose
+#
+#  Nur Datenbanken (lokale Entwicklung / Windows):   docker compose up -d
+#  Komplette Anwendung (Server-Hosting):             docker compose --profile app up -d --build
 services:
   postgres:
     image: postgres:16-alpine
@@ -9,7 +11,7 @@ services:
       POSTGRES_PASSWORD: discordos
       POSTGRES_DB: discordos
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -22,9 +24,30 @@ services:
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes"]
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     volumes:
       - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
+
+  app:
+    profiles: ["app"]
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://discordos:discordos@postgres:5432/discordos?schema=public
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
   pgdata:

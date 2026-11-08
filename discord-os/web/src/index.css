@@ -1,0 +1,84 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Discord OS – Design-Tokens (Anthrazit, Indigo/Violett-Akzente) */
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --color-base: #0d0e12;
+  --color-panel: #14161c;
+  --color-panel-2: #1a1d24;
+  --color-panel-3: #22262f;
+  --color-line: #262a34;
+  --color-line-strong: #333845;
+  --color-fg: #e8eaf0;
+  --color-fg-muted: #9aa1b2;
+  --color-fg-subtle: #6b7286;
+
+  --color-brand-300: #a5b4fc;
+  --color-brand-400: #818cf8;
+  --color-brand-500: #6366f1;
+  --color-brand-600: #4f46e5;
+  --color-accent-400: #c084fc;
+  --color-accent-500: #a855f7;
+
+  --shadow-glow: 0 0 0 1px rgb(99 102 241 / 0.25), 0 8px 32px -8px rgb(99 102 241 / 0.35);
+  --shadow-card: 0 1px 0 0 rgb(255 255 255 / 0.03) inset, 0 12px 32px -16px rgb(0 0 0 / 0.6);
+
+  --animate-pulse-soft: pulse-soft 2.4s ease-in-out infinite;
+  @keyframes pulse-soft {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.45;
+    }
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-base text-fg font-sans antialiased;
+    background-image:
+      radial-gradient(1200px 600px at 10% -10%, rgb(99 102 241 / 0.08), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgb(168 85 247 / 0.06), transparent 60%);
+    background-attachment: fixed;
+  }
+  ::selection {
+    background: rgb(99 102 241 / 0.4);
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #2c313c transparent;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-line bg-panel/80 backdrop-blur-sm;
+    box-shadow: var(--shadow-card);
+  }
+  .input {
+    @apply w-full rounded-xl border border-line bg-panel-2 px-3 py-2 text-sm text-fg placeholder:text-fg-subtle transition
+      focus:border-brand-500/70 focus:outline-none focus:ring-2 focus:ring-brand-500/25 disabled:opacity-50;
+  }
+  .label {
+    @apply mb-1.5 block text-xs font-medium tracking-wide text-fg-muted uppercase;
+  }
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand-300 via-brand-400 to-accent-400 bg-clip-text text-transparent;
+  }
+  .table-row {
+    @apply border-b border-line/60 transition-colors hover:bg-panel-2/60;
+  }
+}

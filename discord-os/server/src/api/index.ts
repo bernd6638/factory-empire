@@ -73,6 +73,7 @@ export function createApp() {
         },
       },
       crossOriginEmbedderPolicy: false,
+      strictTransportSecurity: e.PUBLIC_URL.startsWith('https://') ? undefined : false,
     }),
   );
   app.use(express.json({ limit: '256kb' }));

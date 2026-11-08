@@ -107,7 +107,7 @@ export async function startBot(): Promise<() => Promise<void>> {
   client.on(Events.Error, (err) => log.error({ err }, 'Discord-Client-Fehler'));
 
   stats.start();
-  await client.login(e.DISCORD_TOKEN);
+  await loginWithRetry(client, e.DISCORD_TOKEN);
 
   return async () => {
     log.info('Bot wird heruntergefahren …');
@@ -118,4 +118,27 @@ export async function startBot(): Promise<() => Promise<void>> {
     await client.destroy();
     await bus.close();
   };
+}
+
+/** Meldet den Bot an. Netzwerkfehler werden mit wachsender Wartezeit wiederholt, ein ungültiger Token bricht ab. */
+async function loginWithRetry(client: Client, token: string) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      await client.login(token);
+      return;
+    } catch (err: any) {
+      const code = String(err?.code ?? '');
+      if (code === 'TokenInvalid' || code === 'DisallowedIntents' || /token/i.test(String(err?.message))) {
+        log.fatal(
+          code === 'DisallowedIntents'
+            ? 'Privilegierte Intents sind nicht aktiviert. Aktiviere im Developer-Portal unter "Bot" die Intents "Server Members" und "Message Content".'
+            : 'Der Discord-Token ist ungültig. Bitte DISCORD_TOKEN in der .env prüfen.',
+        );
+        throw err;
+      }
+      const delay = Math.min(5_000 * attempt, 60_000);
+      log.warn({ err: err?.message, attempt }, `Anmeldung bei Discord fehlgeschlagen – neuer Versuch in ${delay / 1000}s`);
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
 }
