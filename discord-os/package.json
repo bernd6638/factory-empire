@@ -1,0 +1,29 @@
+{
+  "name": "discord-os",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Discord OS – Discord-Verwaltungssystem mit Bot, Web-Dashboard, PostgreSQL und Redis",
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "dev": "concurrently -k -n server,web -c blue,magenta \"npm run dev -w server\" \"npm run dev -w web\"",
+    "build": "npm run build -w server && npm run build -w web",
+    "start": "npm run start -w server",
+    "start:bot": "npm run start:bot -w server",
+    "start:api": "npm run start:api -w server",
+    "db:deploy": "npm run db:deploy -w server",
+    "db:migrate": "npm run db:migrate -w server",
+    "db:studio": "npm run db:studio -w server",
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w web",
+    "test": "npm run test -w server"
+  },
+  "devDependencies": {
+    "concurrently": "9.2.5"
+  },
+  "engines": {
+    "node": ">=20.11"
+  }
+}

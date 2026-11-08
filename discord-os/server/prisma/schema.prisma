@@ -1,0 +1,460 @@
+// Discord OS – Datenbankmodell (PostgreSQL)
+// Änderungen: `npm run db:migrate` erzeugt eine neue Migration.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────── Kern ───────────────────────────
+
+model Guild {
+  id          String    @id
+  name        String
+  icon        String?
+  ownerId     String?
+  memberCount Int       @default(0)
+  active      Boolean   @default(true) // false = Bot wurde entfernt
+  joinedAt    DateTime  @default(now())
+  leftAt      DateTime?
+  updatedAt   DateTime  @updatedAt
+
+  modules     GuildModule[]
+  members     MemberProfile[]
+  cases       ModCase[]
+  logs        LogEntry[]
+  tickets     Ticket[]
+  automations Automation[]
+}
+
+/// Plugin-System: ein Eintrag pro Server und Modul mit eigenem Konfigurations-JSON.
+model GuildModule {
+  guildId   String
+  moduleKey String
+  enabled   Boolean  @default(true)
+  config    Json     @default("{}")
+  updatedAt DateTime @updatedAt
+  guild     Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@id([guildId, moduleKey])
+}
+
+/// Freier Schlüssel-Wert-Speicher für Module ohne eigene Tabellen.
+model ModuleData {
+  guildId   String
+  moduleKey String
+  key       String
+  value     Json
+  updatedAt DateTime @updatedAt
+
+  @@id([guildId, moduleKey, key])
+}
+
+/// Dashboard-Benutzer (nur Profil – Tokens liegen verschlüsselt in der Session).
+model User {
+  id        String   @id
+  username  String
+  avatar    String?
+  lastLogin DateTime @default(now())
+  createdAt DateTime @default(now())
+}
+
+enum AccessLevel {
+  VIEWER
+  MODERATOR
+  ADMIN
+}
+
+enum PermissionTarget {
+  ROLE
+  USER
+}
+
+/// Rollenbasierte Dashboard-Berechtigungen (zusätzlich zu "Server verwalten").
+model DashboardPermission {
+  id         Int              @id @default(autoincrement())
+  guildId    String
+  targetType PermissionTarget
+  targetId   String
+  level      AccessLevel
+  createdAt  DateTime         @default(now())
+
+  @@unique([guildId, targetType, targetId])
+}
+
+/// Protokoll administrativer Aktionen im Dashboard.
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  guildId   String?
+  userId    String
+  action    String
+  details   Json     @default("{}")
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([guildId, createdAt])
+}
+
+// ─────────────────────── Mitglieder & Statistik ───────────────────────
+
+model MemberProfile {
+  guildId       String
+  userId        String
+  username      String
+  avatar        String?
+  bot           Boolean   @default(false)
+  xp            Int       @default(0)
+  level         Int       @default(0)
+  messages      Int       @default(0)
+  voiceMinutes  Int       @default(0)
+  joinedAt      DateTime?
+  leftAt        DateTime?
+  lastMessageAt DateTime?
+  lastXpAt      DateTime?
+  inGuild       Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  guild         Guild     @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@id([guildId, userId])
+  @@index([guildId, xp])
+  @@index([guildId, lastMessageAt])
+}
+
+/// Tagesstatistik pro Mitglied (für Wochen-/Monatsranglisten und Profile).
+model MemberDailyStat {
+  guildId      String
+  userId       String
+  date         DateTime @db.Date
+  messages     Int      @default(0)
+  xp           Int      @default(0)
+  voiceMinutes Int      @default(0)
+
+  @@id([guildId, userId, date])
+  @@index([guildId, date])
+}
+
+/// Stündliche Server-Aktivität.
+model GuildStatHour {
+  guildId      String
+  hour         DateTime
+  messages     Int      @default(0)
+  joins        Int      @default(0)
+  leaves       Int      @default(0)
+  modActions   Int      @default(0)
+  voiceMinutes Int      @default(0)
+
+  @@id([guildId, hour])
+}
+
+/// Tägliche Momentaufnahme (Mitgliederzahl, Online-Spitze).
+model GuildStatDay {
+  guildId     String
+  date        DateTime @db.Date
+  memberCount Int      @default(0)
+  onlinePeak  Int      @default(0)
+
+  @@id([guildId, date])
+}
+
+// ─────────────────────────── Moderation ───────────────────────────
+
+enum CaseType {
+  WARN
+  TIMEOUT
+  UNTIMEOUT
+  KICK
+  BAN
+  UNBAN
+  NOTE
+}
+
+enum CaseSource {
+  COMMAND
+  DASHBOARD
+  AUTOMOD
+  SYSTEM
+}
+
+model ModCase {
+  id          Int        @id @default(autoincrement())
+  guildId     String
+  caseNumber  Int
+  type        CaseType
+  userId      String
+  userTag     String?
+  moderatorId String
+  reason      String?
+  durationSec Int?
+  expiresAt   DateTime?
+  active      Boolean    @default(true)
+  source      CaseSource @default(COMMAND)
+  createdAt   DateTime   @default(now())
+  guild       Guild      @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@unique([guildId, caseNumber])
+  @@index([guildId, userId])
+  @@index([type, active, expiresAt])
+}
+
+// ─────────────────────────── Logging ───────────────────────────
+
+model LogEntry {
+  id        BigInt   @id @default(autoincrement())
+  guildId   String
+  category  String // messages | members | roles | channels | moderation | voice | server
+  type      String
+  actorId   String?
+  targetId  String?
+  channelId String?
+  summary   String
+  data      Json     @default("{}")
+  createdAt DateTime @default(now())
+  guild     Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@index([guildId, createdAt])
+  @@index([guildId, category, createdAt])
+}
+
+// ─────────────────────────── Tickets ───────────────────────────
+
+enum TicketStatus {
+  OPEN
+  CLAIMED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+model Ticket {
+  id          Int            @id @default(autoincrement())
+  guildId     String
+  number      Int
+  channelId   String?
+  ownerId     String
+  ownerTag    String?
+  categoryKey String
+  subject     String?
+  status      TicketStatus   @default(OPEN)
+  priority    TicketPriority @default(NORMAL)
+  assigneeId  String?
+  closedById  String?
+  closeReason String?
+  archived    Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+  claimedAt   DateTime?
+  closedAt    DateTime?
+  guild       Guild          @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  messages    TicketMessage[]
+
+  @@unique([guildId, number])
+  @@index([guildId, status])
+  @@index([channelId])
+}
+
+model TicketMessage {
+  id          Int      @id @default(autoincrement())
+  ticketId    Int
+  messageId   String
+  authorId    String
+  authorTag   String
+  authorBot   Boolean  @default(false)
+  content     String
+  attachments Json     @default("[]")
+  embeds      Json     @default("[]")
+  createdAt   DateTime
+  ticket      Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId, createdAt])
+}
+
+// ─────────────────────────── Economy (virtuell) ───────────────────────────
+
+model EconomyAccount {
+  guildId     String
+  userId      String
+  wallet      Int       @default(0)
+  bank        Int       @default(0)
+  totalEarned Int       @default(0)
+  dailyStreak Int       @default(0)
+  lastDaily   DateTime?
+  lastWork    DateTime?
+  lastMsgCoin DateTime?
+  jobId       Int?
+  companyId   Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  job         Job?      @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  company     Company?  @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  @@id([guildId, userId])
+  @@index([guildId, wallet])
+}
+
+model ShopItem {
+  id          Int             @id @default(autoincrement())
+  guildId     String
+  name        String
+  description String?
+  emoji       String?
+  price       Int
+  stock       Int? // null = unbegrenzt
+  roleId      String? // Rolle, die beim Kauf vergeben wird
+  tradable    Boolean         @default(true)
+  enabled     Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  inventory   InventoryItem[]
+
+  @@unique([guildId, name])
+}
+
+model InventoryItem {
+  guildId  String
+  userId   String
+  itemId   Int
+  quantity Int      @default(1)
+  item     ShopItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@id([guildId, userId, itemId])
+}
+
+enum TransactionType {
+  DAILY
+  WORK
+  MESSAGE
+  TRANSFER
+  PURCHASE
+  TRADE
+  DEPOSIT
+  WITHDRAW
+  COMPANY
+  ADMIN
+  REWARD
+}
+
+model Transaction {
+  id         Int             @id @default(autoincrement())
+  guildId    String
+  type       TransactionType
+  fromUserId String?
+  toUserId   String?
+  amount     Int
+  note       String?
+  createdAt  DateTime        @default(now())
+
+  @@index([guildId, createdAt])
+  @@index([guildId, fromUserId])
+  @@index([guildId, toUserId])
+}
+
+model Job {
+  id            Int              @id @default(autoincrement())
+  guildId       String
+  name          String
+  description   String?
+  emoji         String?
+  minPay        Int
+  maxPay        Int
+  requiredLevel Int              @default(0)
+  createdAt     DateTime         @default(now())
+  accounts      EconomyAccount[]
+
+  @@unique([guildId, name])
+}
+
+model Company {
+  id        Int              @id @default(autoincrement())
+  guildId   String
+  name      String
+  ownerId   String
+  balance   Int              @default(0)
+  open      Boolean          @default(true)
+  createdAt DateTime         @default(now())
+  members   EconomyAccount[]
+
+  @@unique([guildId, name])
+}
+
+enum TradeStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELLED
+  EXPIRED
+}
+
+model Trade {
+  id           Int         @id @default(autoincrement())
+  guildId      String
+  fromUserId   String
+  toUserId     String
+  offerMoney   Int         @default(0)
+  offerItemId  Int?
+  offerQty     Int         @default(0)
+  requestMoney Int         @default(0)
+  requestItemId Int?
+  requestQty   Int         @default(0)
+  status       TradeStatus @default(PENDING)
+  createdAt    DateTime    @default(now())
+  resolvedAt   DateTime?
+
+  @@index([guildId, status])
+}
+
+// ─────────────────────────── Automatisierung ───────────────────────────
+
+model Automation {
+  id            Int       @id @default(autoincrement())
+  guildId       String
+  name          String
+  enabled       Boolean   @default(true)
+  trigger       String // MEMBER_JOIN | MEMBER_LEAVE | MESSAGE_CONTAINS | REACTION_ADD | ROLE_ADDED | SCHEDULE | INACTIVITY | LEVEL_UP
+  triggerConfig Json      @default("{}")
+  conditions    Json      @default("{}")
+  actions       Json      @default("[]")
+  runCount      Int       @default(0)
+  lastRunAt     DateTime?
+  nextRunAt     DateTime?
+  lastError     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  guild         Guild     @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@index([guildId, trigger])
+  @@index([trigger, enabled, nextRunAt])
+}
+
+model Reminder {
+  id        Int      @id @default(autoincrement())
+  guildId   String
+  userId    String
+  channelId String
+  message   String
+  remindAt  DateTime
+  done      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([done, remindAt])
+}
+
+// ─────────────────────────── Voice ───────────────────────────
+
+model TempVoiceChannel {
+  channelId String   @id
+  guildId   String
+  ownerId   String
+  creatorId String // Join-to-Create-Kanal, aus dem er entstand
+  locked    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([guildId])
+}
