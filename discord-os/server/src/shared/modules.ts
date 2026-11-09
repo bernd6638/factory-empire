@@ -325,6 +325,31 @@ export const giveawaysSchema = z.object({
   reminderTemplate: text(500, '⏰ Nur noch {time} – letzte Chance für **{prize}**!'),
 });
 
+// ─────────────── KI-Sprach-Bot (lokal) ───────────────
+export const voiceaiSchema = z.object({
+  botName: text(32, 'Rad'),
+  /** Zusätzliche Aktivierungswörter; der Bot-Name zählt immer */
+  wakeWords: z.array(z.string().min(2).max(40)).max(10).default(() => []),
+  requireWakeWord: z.boolean().default(true),
+  /** Nach einer Antwort darf man so lange ohne Aktivierungswort weiterreden */
+  followUpSeconds: z.number().int().min(0).max(120).default(20),
+  persona: text(
+    2000,
+    'Du bist {name}, ein freundlicher, schlagfertiger Discord-Bot auf dem Server „{server}“. Du unterhältst dich locker auf Deutsch. Deine Antworten werden laut vorgelesen: antworte kurz und natürlich in 1–3 Sätzen, ohne Emojis, Listen oder Markdown.',
+  ),
+  model: text(80, 'qwen2.5:7b'),
+  temperature: z.number().min(0).max(1.5).default(0.7),
+  maxTokens: z.number().int().min(20).max(600).default(140),
+  historyTurns: z.number().int().min(0).max(30).default(8),
+  language: text(8, 'de'),
+  voice: text(80, 'de_DE-thorsten-medium'),
+  speechRate: z.number().min(0.5).max(2).default(1),
+  transcriptChannelId: optId,
+  allowedRoleIds: ids,
+  autoLeaveMinutes: z.number().int().min(1).max(120).default(5),
+  announceJoin: z.boolean().default(true),
+});
+
 // ─────────────── Registry ───────────────
 
 export const MODULES = {
@@ -399,6 +424,14 @@ export const MODULES = {
     category: 'Community',
     defaultEnabled: true,
     schema: giveawaysSchema,
+  },
+  voiceai: {
+    name: 'KI-Sprach-Bot',
+    description: 'Der Bot kommt in den Sprachkanal und unterhält sich mit euch – komplett lokal (Whisper, Ollama, Piper).',
+    icon: 'AudioLines',
+    category: 'Werkzeuge',
+    defaultEnabled: false,
+    schema: voiceaiSchema,
   },
   voice: {
     name: 'Voice-Manager',

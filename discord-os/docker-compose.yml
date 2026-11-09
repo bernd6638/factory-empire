@@ -2,6 +2,7 @@
 #
 #  Nur Datenbanken (lokale Entwicklung / Windows):   docker compose up -d
 #  Komplette Anwendung (Server-Hosting):             docker compose --profile app up -d --build
+#  Mit lokalem KI-Sprach-Bot (NVIDIA-GPU):           docker compose --profile app --profile voice up -d --build
 services:
   postgres:
     image: postgres:16-alpine
@@ -41,6 +42,8 @@ services:
       NODE_ENV: production
       DATABASE_URL: postgresql://discordos:discordos@postgres:5432/discordos?schema=public
       REDIS_URL: redis://redis:6379
+      VOICE_AI_URL: http://voice-ai:8000
+      OLLAMA_URL: http://ollama:11434
     ports:
       - "3001:3001"
     depends_on:
@@ -49,6 +52,38 @@ services:
       redis:
         condition: service_healthy
 
+  # Lokaler Sprachdienst: Spracherkennung (Whisper) + Sprachausgabe (Piper) auf der CPU
+  voice-ai:
+    profiles: ["voice"]
+    build: ./voice-ai
+    restart: unless-stopped
+    environment:
+      WHISPER_MODEL: ${WHISPER_MODEL:-small}
+      CPU_THREADS: ${WHISPER_THREADS:-4}
+      DEFAULT_VOICE: de_DE-thorsten-medium
+    volumes:
+      - voicemodels:/models
+
+  # Lokales Sprachmodell (Ollama) auf der NVIDIA-Grafikkarte
+  ollama:
+    profiles: ["voice"]
+    image: ollama/ollama:0.12.6
+    restart: unless-stopped
+    environment:
+      OLLAMA_KEEP_ALIVE: 30m
+      OLLAMA_NUM_PARALLEL: 1
+    volumes:
+      - ollama:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
 volumes:
   pgdata:
   redisdata:
+  voicemodels:
+  ollama:

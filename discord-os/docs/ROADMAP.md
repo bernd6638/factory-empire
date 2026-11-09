@@ -9,4 +9,5 @@ Die Erweiterung wird in Phasen umgesetzt. In der Navigation erscheint nur, was v
 | 3 | Event Manager 2.0 (Kalender), Reputation 2.0, Invite Tracker 2.0 | geplant |
 | 4 | Staff Manager (Bewerbungen, Schichten, Aufgaben, Abwesenheiten), Partnership Manager | geplant |
 | 5 | Social Feed (RSS, YouTube, Reddit, GitHub; Twitch mit eigenem API-Schlüssel), Server-Backup, Custom Commands, Health/Uptime-Verlauf, API-Verwaltung | geplant |
-| 6 | KI-Assistent (benötigt einen eigenen API-Schlüssel), Virtual Stock Market, Modul-Marktplatz | geplant |
+| – | KI-Sprach-Bot, lokal (Whisper, Ollama, Piper) – siehe SPRACH-BOT.md | ✅ fertig |
+| 6 | KI-Assistent im Dashboard, Virtual Stock Market, Modul-Marktplatz | geplant |

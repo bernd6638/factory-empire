@@ -67,7 +67,7 @@ const WIDGETS = [
 ] as const;
 type WidgetId = (typeof WIDGETS)[number]['id'];
 
-const MODULE_LABEL: Record<ModuleKey, string> = { moderation: 'Moderation', automod: 'Auto-Mod', logging: 'Logging', leveling: 'Level & XP', welcome: 'Willkommen', tickets: 'Tickets', economy: 'Economy', automation: 'Automation', voice: 'Voice', giveaways: 'Giveaways' };
+const MODULE_LABEL: Record<ModuleKey, string> = { moderation: 'Moderation', automod: 'Auto-Mod', logging: 'Logging', leveling: 'Level & XP', welcome: 'Willkommen', tickets: 'Tickets', economy: 'Economy', automation: 'Automation', voice: 'Voice', giveaways: 'Giveaways', voiceai: 'KI-Sprache' };
 
 export function countdown(to: string | Date, now: number) {
   const diff = Math.max(0, new Date(to).getTime() - now) / 1000;

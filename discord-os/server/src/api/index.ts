@@ -30,6 +30,7 @@ import { settingsRouter } from './routes/settings';
 import { messagesRouter } from './routes/messages';
 import { giveawaysRouter } from './routes/giveaways';
 import { controlRouter } from './routes/control';
+import { voiceaiRouter } from './routes/voiceai';
 
 const log = childLogger('api');
 
@@ -104,6 +105,7 @@ export function createApp() {
   guild.use('/messages', messagesRouter);
   guild.use('/giveaways', giveawaysRouter);
   guild.use('/control', controlRouter);
+  guild.use('/voiceai', voiceaiRouter);
 
   api.use('/guilds', requireAuth, guildsRouter);
   api.use('/guilds/:guildId', requireAuth, guild);

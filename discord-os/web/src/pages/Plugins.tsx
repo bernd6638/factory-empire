@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, ArrowRight, Coins, Database, Gavel, Gift, HandHeart, Mic, Puzzle, RotateCcw, ScrollText, ShieldAlert, Terminal, Ticket, TrendingUp, Workflow, type LucideIcon } from 'lucide-react';
+import { AudioLines, AlertTriangle, ArrowRight, Coins, Database, Gavel, Gift, HandHeart, Mic, Puzzle, RotateCcw, ScrollText, ShieldAlert, Terminal, Ticket, TrendingUp, Workflow, type LucideIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { relative } from '../lib/format';
@@ -21,8 +21,8 @@ interface ModuleInfo {
   data: Record<string, number>;
 }
 
-const ICONS: Record<string, LucideIcon> = { Gift, Gavel, ShieldAlert, ScrollText, TrendingUp, HandHeart, Ticket, Coins, Workflow, Mic };
-const ROUTES: Record<ModuleKey, string> = { moderation: 'moderation', automod: 'moderation', logging: 'logs', leveling: 'leveling', welcome: 'automations', tickets: 'tickets', economy: 'economy', automation: 'automations', voice: 'voice', giveaways: 'giveaways' };
+const ICONS: Record<string, LucideIcon> = { AudioLines, Gift, Gavel, ShieldAlert, ScrollText, TrendingUp, HandHeart, Ticket, Coins, Workflow, Mic };
+const ROUTES: Record<ModuleKey, string> = { moderation: 'moderation', automod: 'moderation', logging: 'logs', leveling: 'leveling', welcome: 'automations', tickets: 'tickets', economy: 'economy', automation: 'automations', voice: 'voice', giveaways: 'giveaways', voiceai: 'voiceai' };
 
 export default function PluginsPage() {
   const guildId = useGuildId();

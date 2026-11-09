@@ -1,5 +1,6 @@
 import {
   Activity,
+  AudioLines,
   Coins,
   Gift,
   LayoutDashboard,
@@ -70,6 +71,7 @@ export const NAV: NavGroup[] = [
       { to: 'messages', label: 'Nachrichten', icon: Send, min: 'MODERATOR', keywords: 'embed senden ankündigung say' },
       { to: 'tickets', label: 'Tickets', icon: Ticket, min: 'MODERATOR', module: 'tickets', keywords: 'support anfragen' },
       { to: 'automations', label: 'Automation Builder', icon: Workflow, min: 'VIEWER', module: 'automation', keywords: 'regeln zeitplan willkommen erinnerungen umfrage' },
+      { to: 'voiceai', label: 'KI-Sprach-Bot', icon: AudioLines, min: 'VIEWER', module: 'voiceai', keywords: 'ki ai sprechen talk stimme assistent' },
       { to: 'voice', label: 'Voice-Manager', icon: Mic, min: 'VIEWER', module: 'voice', keywords: 'sprachkanäle temporär' },
     ],
   },

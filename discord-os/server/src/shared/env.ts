@@ -41,6 +41,9 @@ const schema = z.object({
     .string()
     .optional()
     .transform((v) => (v ?? '').split(',').map((s) => s.trim()).filter(Boolean)),
+  /** Lokale KI-Dienste für den Sprach-Bot (optional) */
+  VOICE_AI_URL: z.string().url().default('http://localhost:8000').transform((v) => v.replace(/\/+$/, '')),
+  OLLAMA_URL: z.string().url().default('http://localhost:11434').transform((v) => v.replace(/\/+$/, '')),
   LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
 });
 
