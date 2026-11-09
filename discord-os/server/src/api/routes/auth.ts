@@ -11,7 +11,7 @@ import { HttpError } from '../http';
 
 /** Berechtigungen, die der Bot für alle Module benötigt (Einladungslink). */
 export const BOT_PERMISSIONS = new PermissionsBitField([
-  'ViewChannel', 'SendMessages', 'EmbedLinks', 'AttachFiles', 'ReadMessageHistory', 'AddReactions', 'UseExternalEmojis',
+  'ViewChannel', 'SendMessages', 'SendPolls', 'EmbedLinks', 'AttachFiles', 'ReadMessageHistory', 'AddReactions', 'UseExternalEmojis',
   'ManageMessages', 'ManageChannels', 'ManageRoles', 'ManageGuild', 'ViewAuditLog',
   'KickMembers', 'BanMembers', 'ModerateMembers', 'ManageNicknames',
   'Connect', 'Speak', 'MoveMembers',

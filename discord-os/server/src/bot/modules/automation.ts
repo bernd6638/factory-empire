@@ -100,6 +100,22 @@ async function runAction(action: AutomationAction, rc: RunContext, ruleName: str
       else await ch.send({ content: text, allowedMentions: mentions });
       break;
     }
+    case 'SEND_POLL': {
+      const ch = await getSendableChannel(guild, action.channelId ?? rc.channelId);
+      if (!ch) throw new Error('Zielkanal nicht verfügbar oder keine Schreibrechte');
+      if (!ch.permissionsFor(guild.members.me!)?.has(PermissionFlagsBits.SendPolls)) throw new Error('Dem Bot fehlt die Berechtigung „Umfragen erstellen“');
+      await ch.send({
+        content: action.content ? renderTemplate(action.content, v) : undefined,
+        poll: {
+          question: { text: renderTemplate(action.question, v).slice(0, 300) },
+          answers: action.answers.map((a) => ({ text: renderTemplate(a.text, v).slice(0, 55), ...(a.emoji ? { emoji: a.emoji } : {}) })),
+          duration: action.durationHours,
+          allowMultiselect: action.allowMultiselect,
+        },
+        allowedMentions: { parse: ['users', 'roles', 'everyone'] },
+      });
+      break;
+    }
     case 'REPLY':
       if (!rc.message) throw new Error('„Antworten“ funktioniert nur bei Nachrichten-Auslösern');
       await rc.message.reply({ content: renderTemplate(action.content, v), allowedMentions: { repliedUser: true, parse: [] } });

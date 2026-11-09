@@ -117,7 +117,7 @@ Alle Geldbewegungen sind atomar, ein negativer Kontostand ist ausgeschlossen. Je
 | Inaktivität | Tage ohne Nachricht (stündliche Prüfung, einmal pro Mitglied) |
 
 **Bedingungen:** Bots ignorieren, erforderliche Rollen, ausgeschlossene Rollen.
-**Aktionen:** Nachricht senden (Text oder Embed), antworten, DM, Rolle hinzufügen oder entfernen, Reaktion, Nachricht löschen, Timeout. Jede Aktion kann um bis zu 15 Minuten verzögert werden.
+**Aktionen:** Nachricht senden (Text oder Embed), Discord-Umfrage senden (2–10 Antworten, Laufzeit bis 32 Tage), antworten, DM, Rolle hinzufügen oder entfernen, Reaktion, Nachricht löschen, Timeout. Jede Aktion kann um bis zu 15 Minuten verzögert werden.
 **Platzhalter:** `{user} {username} {userId} {server} {memberCount} {channel} {level} {days} {date}`.
 
 Ein Schutz gegen Endlosschleifen begrenzt die Ausführungen pro Minute. Fehler werden pro Regel angezeigt. Ein Testlauf ist direkt aus dem Dashboard möglich.

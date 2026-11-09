@@ -54,6 +54,22 @@ export const actionSchema = z.discriminatedUnion('type', [
     color: z.string().regex(/^#[0-9a-fA-F]{6}$/).default('#6366f1'),
     delaySeconds: delay,
   }),
+  z.object({
+    type: z.literal('SEND_POLL'),
+    /** null = Kanal des Ereignisses */
+    channelId: snowflake.nullable().default(null),
+    /** Optionaler Text über der Umfrage (z. B. mit @Rolle) */
+    content: z.string().max(2000).default(''),
+    question: z.string().min(1).max(300),
+    answers: z
+      .array(z.object({ text: z.string().min(1).max(55), emoji: z.string().max(64).default('') }))
+      .min(2)
+      .max(10),
+    /** Laufzeit in Stunden (Discord erlaubt 1–768 = 32 Tage) */
+    durationHours: z.number().int().min(1).max(768).default(168),
+    allowMultiselect: z.boolean().default(false),
+    delaySeconds: delay,
+  }),
   z.object({ type: z.literal('REPLY'), content: z.string().min(1).max(2000), delaySeconds: delay }),
   z.object({ type: z.literal('SEND_DM'), content: z.string().min(1).max(2000), delaySeconds: delay }),
   z.object({ type: z.literal('ADD_ROLE'), roleId: snowflake, delaySeconds: delay }),
@@ -66,6 +82,7 @@ export type AutomationAction = z.infer<typeof actionSchema>;
 
 export const ACTION_LABELS: Record<AutomationAction['type'], string> = {
   SEND_MESSAGE: 'Nachricht senden',
+  SEND_POLL: 'Umfrage senden',
   REPLY: 'Antworten',
   SEND_DM: 'Direktnachricht senden',
   ADD_ROLE: 'Rolle hinzufügen',

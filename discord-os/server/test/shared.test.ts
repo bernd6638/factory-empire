@@ -88,6 +88,19 @@ describe('Automatisierungen', () => {
     const badRegex = automationInputSchema.safeParse({ name: 'X', trigger: 'MESSAGE_CONTAINS', triggerConfig: { keywords: ['(['], matchMode: 'regex' }, actions: [{ type: 'REPLY', content: 'Hi' }] });
     expect(badRegex.success).toBe(false);
   });
+  it('Umfrage-Aktion mit Quartals-Zeitplan', () => {
+    const rule = automationInputSchema.safeParse({
+      name: 'RAD-Abstimmung',
+      trigger: 'SCHEDULE',
+      triggerConfig: { cron: '0 18 1 1,4,7,10 *' },
+      actions: [{ type: 'SEND_POLL', channelId: '123456789012345678', question: 'Wer möchte in den RAD?', answers: [{ text: 'Ich', emoji: '✅' }, { text: 'Ich nicht', emoji: '❌' }] }],
+    });
+    expect(rule.success).toBe(true);
+    const tooFew = automationInputSchema.safeParse({ name: 'X', trigger: 'SCHEDULE', triggerConfig: { cron: '0 18 1 1,4,7,10 *' }, actions: [{ type: 'SEND_POLL', question: 'Q', answers: [{ text: 'Nur eine' }] }] });
+    expect(tooFew.success).toBe(false);
+    // Vom 15. Februar aus ist der nächste Termin der 1. April 18:00 Berliner Zeit (= 16:00 UTC, Sommerzeit)
+    expect(nextCronRun('0 18 1 1,4,7,10 *', 'Europe/Berlin', new Date('2026-02-15T12:00:00Z'))?.toISOString()).toBe('2026-04-01T16:00:00.000Z');
+  });
   it('vergleicht Nachrichten', () => {
     const base = { keywords: ['hilfe'], caseSensitive: false, channelIds: [] };
     expect(matchesMessage('Ich brauche HILFE', { ...base, matchMode: 'contains' })).toBe(true);

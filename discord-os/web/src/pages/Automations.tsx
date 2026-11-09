@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlarmClock, ArrowDown, Bell, CheckCircle2, Clock, FlaskConical, HandHeart, Pencil, Play, Plus, Settings2, Trash2, Workflow, XCircle, Zap } from 'lucide-react';
+import { AlarmClock, ArrowDown, Bell, CalendarClock, CheckCircle2, Clock, FlaskConical, HandHeart, Pencil, Play, Plus, Settings2, Trash2, Workflow, XCircle, Zap } from 'lucide-react';
 import { useState } from 'react';
 import type { AutomationAction, TriggerType } from '@shared/automation';
 import { api } from '../lib/api';
@@ -37,6 +37,7 @@ const TRIGGERS: Record<TriggerType, { label: string; description: string }> = {
 
 const ACTIONS: Record<AutomationAction['type'], string> = {
   SEND_MESSAGE: 'Nachricht senden',
+  SEND_POLL: 'Umfrage senden',
   REPLY: 'Auf Nachricht antworten',
   SEND_DM: 'Direktnachricht senden',
   ADD_ROLE: 'Rolle hinzufügen',
@@ -46,7 +47,32 @@ const ACTIONS: Record<AutomationAction['type'], string> = {
   TIMEOUT: 'Timeout vergeben',
 };
 
+/** Vorlage: alle 3 Monate (1. Jan/Apr/Jul/Okt, 18 Uhr) eine Umfrage zur RAD-Wahl */
+const PRESET_QUARTERLY_POLL: Partial<Rule> = {
+  name: 'RAD-Abstimmung (alle 3 Monate)',
+  enabled: true,
+  trigger: 'SCHEDULE',
+  triggerConfig: { cron: '0 18 1 1,4,7,10 *' },
+  conditions: { ignoreBots: true, requiredRoleIds: [], excludedRoleIds: [] },
+  actions: [
+    {
+      type: 'SEND_POLL',
+      channelId: null,
+      content: '📢 Die neue RAD-Wahl startet! Stimmt bis nächste Woche ab.',
+      question: 'Wer möchte in den RAD?',
+      answers: [
+        { text: 'Ich', emoji: '✅' },
+        { text: 'Ich nicht', emoji: '❌' },
+      ],
+      durationHours: 168,
+      allowMultiselect: false,
+      delaySeconds: 0,
+    },
+  ],
+};
+
 const CRON_PRESETS = [
+  { label: 'Alle 3 Monate (1. Jan/Apr/Jul/Okt, 18 Uhr)', cron: '0 18 1 1,4,7,10 *' },
   { label: 'Täglich 9:00', cron: '0 9 * * *' },
   { label: 'Montags 18:00', cron: '0 18 * * 1' },
   { label: 'Stündlich', cron: '0 * * * *' },
@@ -57,6 +83,8 @@ function defaultAction(type: AutomationAction['type']): AutomationAction {
   switch (type) {
     case 'SEND_MESSAGE':
       return { type, channelId: null, content: 'Hallo {user}!', embed: false, color: '#6366f1', delaySeconds: 0 };
+    case 'SEND_POLL':
+      return { type, channelId: null, content: '', question: 'Deine Frage?', answers: [{ text: 'Ja', emoji: '✅' }, { text: 'Nein', emoji: '❌' }], durationHours: 168, allowMultiselect: false, delaySeconds: 0 };
     case 'REPLY':
     case 'SEND_DM':
       return { type, content: 'Hallo {user}!', delaySeconds: 0 };
@@ -95,6 +123,7 @@ const MESSAGE_ONLY = new Set(['REPLY', 'ADD_REACTION', 'DELETE_MESSAGE']);
 const MEMBER_ACTIONS = new Set(['ADD_ROLE', 'REMOVE_ROLE', 'TIMEOUT', 'SEND_DM']);
 
 function ActionFields({ action, onChange, trigger }: { action: AutomationAction; onChange: (a: AutomationAction) => void; trigger: TriggerType }) {
+  const missingChannel = trigger === 'SCHEDULE' && (action.type === 'SEND_MESSAGE' || action.type === 'SEND_POLL') && !action.channelId;
   const warn = (MESSAGE_ONLY.has(action.type) && !['MESSAGE_CONTAINS', 'REACTION_ADD'].includes(trigger)) || (MEMBER_ACTIONS.has(action.type) && trigger === 'SCHEDULE') || (['ADD_ROLE', 'REMOVE_ROLE', 'TIMEOUT'].includes(action.type) && trigger === 'MEMBER_LEAVE');
   return (
     <div className="space-y-3">
@@ -110,6 +139,34 @@ function ActionFields({ action, onChange, trigger }: { action: AutomationAction;
           </div>
         </>
       )}
+      {action.type === 'SEND_POLL' && (
+        <>
+          <Field label="Kanal" hint={trigger === 'SCHEDULE' ? 'Für Zeitpläne erforderlich' : 'Leer = Kanal des Ereignisses'}>
+            <ChannelSelect value={action.channelId} onChange={(v) => onChange({ ...action, channelId: v })} />
+          </Field>
+          <Field label="Text über der Umfrage (optional)" hint="z. B. eine Rollen-Erwähnung wie <@&ROLLEN-ID> oder @everyone">
+            <Input value={action.content} maxLength={2000} onChange={(e) => onChange({ ...action, content: e.target.value })} />
+          </Field>
+          <Field label="Frage"><Input value={action.question} maxLength={300} onChange={(e) => onChange({ ...action, question: e.target.value })} /></Field>
+          <div>
+            <div className="label">Antworten (2–10)</div>
+            <div className="space-y-2">
+              {action.answers.map((a, i) => (
+                <div key={i} className="grid grid-cols-[70px_1fr_auto] gap-2">
+                  <Input value={a.emoji} placeholder="Emoji" maxLength={64} onChange={(e) => onChange({ ...action, answers: action.answers.map((x, j) => (j === i ? { ...x, emoji: e.target.value } : x)) })} />
+                  <Input value={a.text} maxLength={55} onChange={(e) => onChange({ ...action, answers: action.answers.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)) })} />
+                  <Button size="icon" variant="ghost" icon={Trash2} disabled={action.answers.length <= 2} onClick={() => onChange({ ...action, answers: action.answers.filter((_, j) => j !== i) })} />
+                </div>
+              ))}
+              {action.answers.length < 10 && <Button size="sm" icon={Plus} onClick={() => onChange({ ...action, answers: [...action.answers, { text: 'Antwort', emoji: '' }] })}>Antwort</Button>}
+            </div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Laufzeit" hint="Max. 768 Std. (32 Tage)"><NumberInput value={action.durationHours} min={1} max={768} suffix="Std." onChange={(v) => onChange({ ...action, durationHours: v })} /></Field>
+            <div className="flex items-end pb-2"><Switch label="Mehrfachauswahl" checked={action.allowMultiselect} onChange={(v) => onChange({ ...action, allowMultiselect: v })} /></div>
+          </div>
+        </>
+      )}
       {(action.type === 'REPLY' || action.type === 'SEND_DM') && <Field label="Nachricht"><Textarea value={action.content} maxLength={2000} onChange={(e) => onChange({ ...action, content: e.target.value })} /></Field>}
       {(action.type === 'ADD_ROLE' || action.type === 'REMOVE_ROLE') && <Field label="Rolle"><RoleSelect assignable value={action.roleId || null} onChange={(v) => onChange({ ...action, roleId: v ?? '' })} /></Field>}
       {action.type === 'ADD_REACTION' && <Field label="Emoji" hint="Unicode-Emoji oder Server-Emoji im Format <:name:id>"><Input value={action.emoji} onChange={(e) => onChange({ ...action, emoji: e.target.value })} /></Field>}
@@ -120,6 +177,7 @@ function ActionFields({ action, onChange, trigger }: { action: AutomationAction;
         </div>
       )}
       <Field label="Verzögerung" hint="Wartezeit vor dieser Aktion (max. 15 Min.)"><NumberInput value={action.delaySeconds} min={0} max={900} suffix="Sek." onChange={(v) => onChange({ ...action, delaySeconds: v } as AutomationAction)} /></Field>
+      {missingChannel && <p className="rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-200">Bitte einen Kanal wählen – bei Zeitplänen gibt es keinen „Kanal des Ereignisses“.</p>}
       {warn && <p className="rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-200">Diese Aktion passt nicht zum gewählten Auslöser und wird voraussichtlich fehlschlagen.</p>}
     </div>
   );
@@ -269,7 +327,10 @@ function RulesTab() {
   });
   return (
     <>
-      <div className="mb-4 flex justify-end">{isAdmin && <Button variant="primary" icon={Plus} onClick={() => setEdit(null)}>Neue Automatisierung</Button>}</div>
+      <div className="mb-4 flex flex-wrap justify-end gap-2">
+        {isAdmin && <Button icon={CalendarClock} onClick={() => setEdit(PRESET_QUARTERLY_POLL)}>Vorlage: RAD-Abstimmung</Button>}
+        {isAdmin && <Button variant="primary" icon={Plus} onClick={() => setEdit(null)}>Neue Automatisierung</Button>}
+      </div>
       {isLoading ? <LoadingBlock /> : !data?.length ? (
         <Card><EmptyState icon={Workflow} title="Noch keine Automatisierungen" description="Begrüße neue Mitglieder, vergib Rollen, veröffentliche Nachrichten nach Zeitplan oder reagiere auf Schlüsselwörter." action={isAdmin && <Button variant="primary" icon={Plus} onClick={() => setEdit(null)}>Erste Regel erstellen</Button>} /></Card>
       ) : (
