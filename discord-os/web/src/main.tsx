@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MotionConfig } from 'framer-motion';
+import type { ReactNode } from 'react';
+import { applyPerfClass, useReduceEffects } from './lib/perf';
 import { App } from './App';
 import { ToastProvider, ConfirmProvider } from './components/ui/overlay';
 import { ApiError } from './lib/api';
@@ -18,10 +20,18 @@ const queryClient = new QueryClient({
   },
 });
 
+applyPerfClass();
+
+/** Animationen abschalten, wenn „Effekte reduzieren“ aktiv ist oder das System es wünscht. */
+function Motion({ children }: { children: ReactNode }) {
+  const reduce = useReduceEffects();
+  return <MotionConfig reducedMotion={reduce ? 'always' : 'user'}>{children}</MotionConfig>;
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <MotionConfig reducedMotion="user">
+      <Motion>
         <BrowserRouter>
           <ToastProvider>
             <ConfirmProvider>
@@ -29,7 +39,7 @@ createRoot(document.getElementById('root')!).render(
             </ConfirmProvider>
           </ToastProvider>
         </BrowserRouter>
-      </MotionConfig>
+      </Motion>
     </QueryClientProvider>
   </StrictMode>,
 );

@@ -31,7 +31,7 @@ export function Logo({ collapsed }: { collapsed?: boolean }) {
   return (
     <div className="flex items-center gap-3">
       <div className="relative">
-        <div className="absolute inset-0 rounded-xl bg-brand-500/50 blur-md" />
+        <div className="absolute -inset-2 rounded-2xl bg-[radial-gradient(circle,rgb(88_101_255/0.45),transparent_70%)]" />
         <LogoMark size={36} className="relative" />
       </div>
       {!collapsed && (

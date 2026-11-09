@@ -31,7 +31,7 @@
   --color-electric-500: #0ea5e9;
 
   --shadow-glow: 0 0 0 1px rgb(88 101 255 / 0.3), 0 10px 40px -10px rgb(88 101 255 / 0.45);
-  --shadow-card: 0 1px 0 0 rgb(255 255 255 / 0.04) inset, 0 20px 40px -24px rgb(0 0 0 / 0.8);
+  --shadow-card: 0 1px 0 0 rgb(255 255 255 / 0.04) inset, 0 8px 16px -12px rgb(0 0 0 / 0.7);
 
   --animate-pulse-soft: pulse-soft 2.4s ease-in-out infinite;
   --animate-shimmer: shimmer 1.6s ease-in-out infinite;
@@ -63,26 +63,30 @@
     @apply bg-base text-fg font-sans antialiased;
     font-feature-settings: 'cv11', 'ss01';
   }
-  /* Hintergrund: Lichtschein + feines Raster als eine fixierte Ebene (einmal gezeichnet) */
+  /* Hintergrund-Lichtschein als eigene, GPU-beschleunigte Ebene (wird nur einmal gezeichnet) */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
     z-index: -1;
     pointer-events: none;
+    transform: translateZ(0);
     background-image:
-      radial-gradient(900px 520px at 15% -12%, rgb(88 101 255 / 0.16), transparent 62%),
-      radial-gradient(800px 480px at 105% 5%, rgb(168 85 247 / 0.12), transparent 60%),
-      radial-gradient(700px 500px at 50% 120%, rgb(14 165 233 / 0.07), transparent 60%),
-      linear-gradient(rgb(255 255 255 / 0.018) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(255 255 255 / 0.018) 1px, transparent 1px);
-    background-size:
-      auto,
-      auto,
-      auto,
-      48px 48px,
-      48px 48px;
-    mask-image: linear-gradient(to bottom, black 0%, black 70%, transparent 100%);
+      radial-gradient(900px 520px at 15% -12%, rgb(88 101 255 / 0.15), transparent 62%),
+      radial-gradient(800px 480px at 105% 5%, rgb(168 85 247 / 0.1), transparent 60%);
+  }
+  /* Leistungsmodus: alle Animationen, Übergänge und Hintergrundeffekte aus */
+  html.reduce-effects *,
+  html.reduce-effects *::before,
+  html.reduce-effects *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  html.reduce-effects body::before {
+    display: none;
+  }
+  html.reduce-effects .card {
+    box-shadow: none;
   }
   ::selection {
     background: rgb(88 101 255 / 0.45);
@@ -121,10 +125,9 @@
       0 0 0 1px rgb(88 101 255 / 0.12),
       0 18px 50px -20px rgb(88 101 255 / 0.35);
   }
+  /* Kopfzeile: fast deckend statt Live-Unschärfe – spart beim Scrollen viel Rechenzeit */
   .glass {
-    background: rgb(10 12 17 / 0.72);
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    background: rgb(9 10 14 / 0.94);
   }
   .input {
     @apply w-full rounded-xl border border-line bg-panel-2 px-3 py-2 text-sm text-fg placeholder:text-fg-subtle transition

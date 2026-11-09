@@ -26,6 +26,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
+import { useTick } from '../lib/tick';
 import { useLive } from '../lib/live';
 import { cn, compact, duration, num, relative } from '../lib/format';
 import type { BotStatus, LogEntry, ModuleKey } from '../lib/types';
@@ -68,15 +69,6 @@ type WidgetId = (typeof WIDGETS)[number]['id'];
 
 const MODULE_LABEL: Record<ModuleKey, string> = { moderation: 'Moderation', automod: 'Auto-Mod', logging: 'Logging', leveling: 'Level & XP', welcome: 'Willkommen', tickets: 'Tickets', economy: 'Economy', automation: 'Automation', voice: 'Voice', giveaways: 'Giveaways' };
 
-function useNow(ms = 1000) {
-  const [now, setNow] = useState(Date.now());
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), ms);
-    return () => clearInterval(t);
-  }, [ms]);
-  return now;
-}
-
 export function countdown(to: string | Date, now: number) {
   const diff = Math.max(0, new Date(to).getTime() - now) / 1000;
   const d = Math.floor(diff / 86400);
@@ -86,6 +78,12 @@ export function countdown(to: string | Date, now: number) {
   if (d) return `${d}T ${h}h ${m}m`;
   if (h) return `${h}h ${m}m ${s}s`;
   return `${m}m ${String(s).padStart(2, '0')}s`;
+}
+
+/** Zeigt einen Countdown; nur diese kleine Komponente wird jede Sekunde neu gezeichnet. */
+function LiveCountdown({ to, prefix = '' }: { to: string; prefix?: string }) {
+  const now = useTick();
+  return <>{prefix}{countdown(to, now)}</>;
 }
 
 /** Ehrlich berechneter Gesundheitswert aus Dienststatus und Warnungen. */
@@ -107,7 +105,7 @@ function HealthRing({ score }: { score: number }) {
     <div className="relative h-36 w-36">
       <svg viewBox="0 0 128 128" className="h-full w-full -rotate-90">
         <circle cx="64" cy="64" r={r} fill="none" stroke="rgb(255 255 255 / 0.06)" strokeWidth="10" />
-        <motion.circle cx="64" cy="64" r={r} fill="none" stroke={color} strokeWidth="10" strokeLinecap="round" strokeDasharray={c} initial={{ strokeDashoffset: c }} animate={{ strokeDashoffset: c * (1 - score / 100) }} transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }} style={{ filter: `drop-shadow(0 0 8px ${color}80)` }} />
+        <motion.circle cx="64" cy="64" r={r} fill="none" stroke={color} strokeWidth="10" strokeLinecap="round" strokeDasharray={c} initial={{ strokeDashoffset: c }} animate={{ strokeDashoffset: c * (1 - score / 100) }} transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }} />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-3xl font-semibold tabular-nums">{score}</span>
@@ -167,7 +165,6 @@ const CATEGORY_TONE: Record<string, string> = { messages: 'bg-electric-400', mem
 export default function ControlCenterPage() {
   const guildId = useGuildId();
   const qc = useQueryClient();
-  const now = useNow(1000);
   const { data: me } = useMe();
   const { data: guild } = useGuild();
   const { channelName } = useLookup();
@@ -341,7 +338,7 @@ export default function ControlCenterPage() {
                       </div>
                       <div className="mt-1.5 flex items-center justify-between text-xs text-fg-muted">
                         <span className="flex items-center gap-1"><Users className="h-3 w-3" />{num(g.entries)}</span>
-                        <span className="flex items-center gap-1 font-mono tabular-nums"><Clock className="h-3 w-3" />{g.status === 'SCHEDULED' ? `Start in ${countdown(g.startsAt, now)}` : g.status === 'PAUSED' ? 'angehalten' : countdown(g.endsAt, now)}</span>
+                        <span className="flex items-center gap-1 font-mono tabular-nums"><Clock className="h-3 w-3" />{g.status === 'PAUSED' ? 'angehalten' : <LiveCountdown to={g.status === 'SCHEDULED' ? g.startsAt : g.endsAt} prefix={g.status === 'SCHEDULED' ? 'Start in ' : ''} />}</span>
                       </div>
                     </Link>
                   ))}

@@ -1,10 +1,11 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { Bot, ChevronDown, ChevronsLeft, ChevronsRight, ChevronsUpDown, LayoutGrid, LogOut, Menu, Search, X } from 'lucide-react';
+import { Bot, Gauge, ChevronDown, ChevronsLeft, ChevronsRight, ChevronsUpDown, LayoutGrid, LogOut, Menu, Search, X } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../lib/api';
 import { useLiveContext } from '../../lib/live';
+import { setReduceEffects, useReduceEffects } from '../../lib/perf';
 import { cn } from '../../lib/format';
 import { ACCESS_RANK, type GuildListItem } from '../../lib/types';
 import { useGuild, useGuildId } from '../../hooks/guild';
@@ -220,6 +221,7 @@ export function BotStatusPill() {
 
 function ProfileMenu() {
   const { data: me } = useMe();
+  const reduce = useReduceEffects();
   const [open, setOpen] = useState(false);
   const ref = useClickOutside(() => setOpen(false));
   const logout = async () => {
@@ -241,7 +243,14 @@ function ProfileMenu() {
                 <div className="truncate text-xs text-fg-subtle">@{me?.username}</div>
               </div>
             </div>
-            <Link to="/servers" onClick={() => setOpen(false)} className="mt-1 flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-fg-muted hover:bg-white/[0.04] hover:text-fg">
+            <button onClick={() => setReduceEffects(!reduce)} className="mt-1 flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-fg-muted hover:bg-white/[0.04] hover:text-fg">
+              <Gauge className="h-4 w-4" />
+              <span className="flex-1 text-left">Effekte reduzieren</span>
+              <span className={cn('relative h-5 w-9 rounded-full transition', reduce ? 'bg-brand-500' : 'bg-panel-3')}>
+                <span className={cn('absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all', reduce ? 'left-[18px]' : 'left-0.5')} />
+              </span>
+            </button>
+            <Link to="/servers" onClick={() => setOpen(false)} className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-fg-muted hover:bg-white/[0.04] hover:text-fg">
               <LayoutGrid className="h-4 w-4" /> Serverauswahl
             </Link>
             <button onClick={logout} className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-red-300 hover:bg-red-500/10">

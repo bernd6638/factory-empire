@@ -28,6 +28,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { api } from '../lib/api';
+import { useTick } from '../lib/tick';
 import { useLive } from '../lib/live';
 import { cn, dateTime, num, relative } from '../lib/format';
 import type { Paged } from '../lib/types';
@@ -93,21 +94,13 @@ const STATUS: Record<Status, { label: string; color: 'green' | 'yellow' | 'blue'
   CANCELLED: { label: 'Abgebrochen', color: 'red' },
 };
 
-function useNow(ms = 1000) {
-  const [now, setNow] = useState(Date.now());
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), ms);
-    return () => clearInterval(t);
-  }, [ms]);
-  return now;
-}
-
 function countdownParts(to: string, now: number) {
   const diff = Math.max(0, new Date(to).getTime() - now) / 1000;
   return { d: Math.floor(diff / 86400), h: Math.floor((diff % 86400) / 3600), m: Math.floor((diff % 3600) / 60), s: Math.floor(diff % 60) };
 }
 
-function Countdown({ to, now }: { to: string; now: number }) {
+function Countdown({ to }: { to: string }) {
+  const now = useTick();
   const p = countdownParts(to, now);
   const cells = p.d ? [['T', p.d], ['Std', p.h], ['Min', p.m]] : [['Std', p.h], ['Min', p.m], ['Sek', p.s]];
   return (
@@ -490,7 +483,19 @@ function DetailModal({ id, onClose }: { id: number; onClose: () => void }) {
 
 // ─────────────────────────── Karte ───────────────────────────
 
-function GiveawayCard({ g, now, onOpen, onEdit, onExtend, index }: { g: Giveaway; now: number; onOpen: () => void; onEdit: () => void; onExtend: () => void; index: number }) {
+/** Zeitfortschritt eines Gewinnspiels (eigene Komponente, damit nur sie im Sekundentakt neu zeichnet). */
+function TimeProgress({ g }: { g: Giveaway }) {
+  const now = useTick();
+  const total = new Date(g.endsAt).getTime() - new Date(g.startsAt).getTime();
+  const elapsed = Math.min(1, Math.max(0, (now - new Date(g.startsAt).getTime()) / total));
+  return (
+    <div className="h-1 overflow-hidden rounded-full bg-white/5">
+      <div className="h-full rounded-full bg-gradient-to-r from-brand-500 to-accent-500" style={{ width: `${elapsed * 100}%` }} />
+    </div>
+  );
+}
+
+function GiveawayCard({ g, onOpen, onEdit, onExtend, index }: { g: Giveaway; onOpen: () => void; onEdit: () => void; onExtend: () => void; index: number }) {
   const guildId = useGuildId();
   const qc = useQueryClient();
   const toast = useToast();
@@ -501,8 +506,6 @@ function GiveawayCard({ g, now, onOpen, onEdit, onExtend, index }: { g: Giveaway
     onSuccess: () => void qc.invalidateQueries({ queryKey: ['giveaways'] }),
     onError: toast.error,
   });
-  const total = new Date(g.endsAt).getTime() - new Date(g.startsAt).getTime();
-  const elapsed = Math.min(1, Math.max(0, (now - new Date(g.startsAt).getTime()) / total));
   const live = g.status === 'ACTIVE';
 
   return (
@@ -546,7 +549,7 @@ function GiveawayCard({ g, now, onOpen, onEdit, onExtend, index }: { g: Giveaway
             {(g.requiredRoleIds.length > 0 || g.minMemberDays > 0 || g.requireVerified) && <span className="flex items-center gap-1"><UserCheck className="h-3.5 w-3.5" />Bedingungen</span>}
           </div>
         </div>
-        {live && <Countdown to={g.endsAt} now={now} />}
+        {live && <Countdown to={g.endsAt} />}
         {g.status === 'SCHEDULED' && <div className="text-sm text-electric-400">Start {dateTime(g.startsAt)}</div>}
         {g.status === 'PAUSED' && <div className="text-sm text-amber-300">Pausiert seit {relative(g.pausedAt)}</div>}
         {g.status === 'ENDED' && (
@@ -557,11 +560,7 @@ function GiveawayCard({ g, now, onOpen, onEdit, onExtend, index }: { g: Giveaway
             <span className="truncate text-sm text-fg-muted">{g.winnerProfiles.length ? g.winnerProfiles.map((w) => w.username).join(', ') : 'Kein Gewinner'}</span>
           </div>
         )}
-        {(live || g.status === 'PAUSED') && (
-          <div className="h-1 overflow-hidden rounded-full bg-white/5">
-            <div className="h-full rounded-full bg-gradient-to-r from-brand-500 to-accent-500" style={{ width: `${elapsed * 100}%` }} />
-          </div>
-        )}
+        {(live || g.status === 'PAUSED') && <TimeProgress g={g} />}
       </div>
     </motion.div>
   );
@@ -627,7 +626,6 @@ type View = 'active' | 'scheduled' | 'ended' | 'archived' | 'settings';
 export default function GiveawaysPage() {
   const guildId = useGuildId();
   const qc = useQueryClient();
-  const now = useNow(1000);
   const [params, setParams] = useSearchParams();
   const [view, setView] = useState<View>('active');
   const [editing, setEditing] = useState<Giveaway | null | undefined>(params.get('new') ? null : undefined);
@@ -696,7 +694,7 @@ export default function GiveawaysPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
           {sorted.map((g, i) => (
-            <GiveawayCard key={g.id} g={g} now={now} index={i} onOpen={() => setParams({ open: String(g.id) })} onEdit={() => setEditing(g)} onExtend={() => setExtending(g)} />
+            <GiveawayCard key={g.id} g={g} index={i} onOpen={() => setParams({ open: String(g.id) })} onEdit={() => setEditing(g)} onExtend={() => setExtending(g)} />
           ))}
         </div>
       )}
