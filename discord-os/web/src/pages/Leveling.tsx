@@ -45,7 +45,7 @@ function Leaderboard() {
           <div className="grid gap-4 md:grid-cols-3">
             {podium.map((p, i) => (
               <Card key={p.userId} delay={i * 0.05} className={`relative overflow-hidden p-5 ${i === 0 ? 'ring-1 ring-amber-400/30' : ''}`}>
-                <div className={`pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full blur-2xl ${['bg-amber-400/20', 'bg-slate-300/15', 'bg-orange-500/15'][i]}`} />
+                <div className={`pointer-events-none absolute -top-10 -right-10 h-40 w-40 rounded-full ${['bg-[radial-gradient(circle,rgb(251_191_36/0.22),transparent_70%)]', 'bg-[radial-gradient(circle,rgb(203_213_225/0.16),transparent_70%)]', 'bg-[radial-gradient(circle,rgb(249_115_22/0.16),transparent_70%)]'][i]}`} />
                 <div className="relative flex items-center gap-4">
                   <div className="relative">
                     <Avatar src={p.avatarUrl} name={p.username} size={56} />

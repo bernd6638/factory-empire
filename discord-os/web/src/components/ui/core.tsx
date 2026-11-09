@@ -250,7 +250,7 @@ export function StatCard({ label, value, icon: Icon, hint, accent = 'brand', del
   };
   return (
     <Card delay={delay} hover className="relative overflow-hidden p-5">
-      <div className="pointer-events-none absolute -top-12 -right-12 h-32 w-32 rounded-full bg-brand-500/5 blur-2xl" />
+      <div className="pointer-events-none absolute -top-12 -right-12 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgb(99_102_241/0.12),transparent_70%)]" />
       <div className="flex items-start justify-between">
         <div>
           <p className="flex items-center gap-2 text-xs font-medium tracking-wide text-fg-muted uppercase">

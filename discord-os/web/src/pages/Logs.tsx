@@ -82,7 +82,7 @@ function LogList() {
         <div>
           <AnimatePresence initial={false}>
             {items.map((e) => (
-              <motion.div key={e.id} layout initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="border-b border-line/60">
+              <motion.div key={e.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="border-b border-line/60">
                 <button onClick={() => setOpen(open === e.id ? null : e.id)} className="flex w-full items-start gap-3 px-5 py-3 text-left hover:bg-panel-2/50">
                   <Badge color={COLORS[e.category] ?? 'gray'} className="mt-0.5 w-24 justify-center">{CATEGORIES[e.category as keyof typeof CATEGORIES] ?? e.category}</Badge>
                   <span className="flex-1 text-sm leading-relaxed">{pretty(e.summary)}</span>

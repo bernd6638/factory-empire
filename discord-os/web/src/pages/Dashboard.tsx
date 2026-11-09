@@ -215,7 +215,7 @@ export default function DashboardPage() {
               <ul>
                 <AnimatePresence initial={false}>
                   {allFeed.map((f) => (
-                    <motion.li key={f.id} layout initial={{ opacity: 0, backgroundColor: 'rgba(99,102,241,0.12)' }} animate={{ opacity: 1, backgroundColor: 'rgba(0,0,0,0)' }} transition={{ duration: 1.2 }} className="flex items-start gap-3 border-b border-line/50 px-5 py-3 last:border-0">
+                    <motion.li key={f.id} initial={{ opacity: 0, backgroundColor: 'rgba(99,102,241,0.12)' }} animate={{ opacity: 1, backgroundColor: 'rgba(0,0,0,0)' }} transition={{ duration: 1.2 }} className="flex items-start gap-3 border-b border-line/50 px-5 py-3 last:border-0">
                       <Badge color={CATEGORY_COLOR[f.category] ?? 'gray'} className="mt-0.5">{CATEGORY_LABEL[f.category] ?? f.category}</Badge>
                       <span className="flex-1 text-sm leading-relaxed text-fg/90">{f.summary.replace(/<#(\d+)>/g, (_, id: string) => channelName(id)).replace(/<@!?(\d+)>/g, '@$1')}</span>
                       <span className="shrink-0 text-xs text-fg-subtle">{relative(f.at)}</span>

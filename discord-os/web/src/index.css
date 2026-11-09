@@ -45,10 +45,17 @@
   }
   body {
     @apply bg-base text-fg font-sans antialiased;
+  }
+  /* Hintergrund-Verlauf als eigene, fixierte Ebene: wird einmal gezeichnet statt bei jedem Scrollen */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
     background-image:
       radial-gradient(1200px 600px at 10% -10%, rgb(99 102 241 / 0.08), transparent 60%),
       radial-gradient(900px 500px at 100% 0%, rgb(168 85 247 / 0.06), transparent 60%);
-    background-attachment: fixed;
   }
   ::selection {
     background: rgb(99 102 241 / 0.4);
@@ -65,7 +72,7 @@
 
 @layer components {
   .card {
-    @apply rounded-2xl border border-line bg-panel/80 backdrop-blur-sm;
+    @apply rounded-2xl border border-line bg-panel;
     box-shadow: var(--shadow-card);
   }
   .input {

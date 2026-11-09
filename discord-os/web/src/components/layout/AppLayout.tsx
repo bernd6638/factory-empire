@@ -242,7 +242,7 @@ export function GuildLayout() {
 
   return (
     <div className="min-h-screen lg:pl-72">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-72 border-r border-line bg-panel/60 backdrop-blur-xl lg:block">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-72 border-r border-line bg-panel lg:block">
         <Sidebar />
       </aside>
       <AnimatePresence>
@@ -259,7 +259,7 @@ export function GuildLayout() {
         )}
       </AnimatePresence>
 
-      <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-line/70 bg-base/70 px-4 backdrop-blur-xl sm:px-6">
+      <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-line/70 bg-base/95 px-4 sm:px-6">
         <div className="flex items-center gap-3">
           <button className="rounded-lg p-2 text-fg-muted hover:bg-panel-2 lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Menü">
             <Menu className="h-5 w-5" />
