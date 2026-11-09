@@ -18,6 +18,7 @@ const VoicePage = lazy(() => import('./pages/Voice'));
 const LogsPage = lazy(() => import('./pages/Logs'));
 const PluginsPage = lazy(() => import('./pages/Plugins'));
 const SettingsPage = lazy(() => import('./pages/Settings'));
+const MessagesPage = lazy(() => import('./pages/Messages'));
 
 function NotFound() {
   return (
@@ -60,6 +61,7 @@ export function App() {
           <Route path="voice" element={<Suspense fallback={<LoadingBlock />}><VoicePage /></Suspense>} />
           <Route path="logs" element={<Suspense fallback={<LoadingBlock />}><LogsPage /></Suspense>} />
           <Route path="plugins" element={<Suspense fallback={<LoadingBlock />}><PluginsPage /></Suspense>} />
+          <Route path="messages" element={<Suspense fallback={<LoadingBlock />}><MessagesPage /></Suspense>} />
           <Route path="settings" element={<Suspense fallback={<LoadingBlock />}><SettingsPage /></Suspense>} />
           <Route path="*" element={<NotFound />} />
         </Route>

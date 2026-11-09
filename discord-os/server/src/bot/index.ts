@@ -19,6 +19,7 @@ import { automationModule, invalidateAutomationCache } from './modules/automatio
 import { welcomeModule } from './modules/welcome';
 import { voiceModule } from './modules/voice';
 import { loggingModule } from './modules/logging';
+import { messagesModule } from './modules/messages';
 
 const log = childLogger('bot');
 
@@ -77,7 +78,7 @@ export async function startBot(): Promise<() => Promise<void>> {
   };
 
   const manager = new ModuleManager(ctx);
-  manager.register(coreModule, moderationModule, automodModule, loggingModule, levelingModule, welcomeModule, ticketsModule, economyModule, automationModule, voiceModule);
+  manager.register(coreModule, moderationModule, automodModule, loggingModule, levelingModule, welcomeModule, ticketsModule, economyModule, automationModule, voiceModule, messagesModule);
   manager.register({
     id: 'core',
     rpc: {

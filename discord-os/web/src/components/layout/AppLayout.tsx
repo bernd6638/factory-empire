@@ -9,6 +9,7 @@ import {
   Mic,
   Puzzle,
   ScrollText,
+  Send,
   Server,
   Settings,
   ShieldAlert,
@@ -64,6 +65,7 @@ const NAV: { title: string; items: NavItem[] }[] = [
   {
     title: 'Werkzeuge',
     items: [
+      { to: 'messages', label: 'Nachrichten', icon: Send, min: 'MODERATOR' },
       { to: 'tickets', label: 'Tickets', icon: Ticket, min: 'MODERATOR', module: 'tickets' },
       { to: 'automations', label: 'Automatisierungen', icon: Workflow, min: 'VIEWER', module: 'automation' },
       { to: 'voice', label: 'Voice-Manager', icon: Mic, min: 'VIEWER', module: 'voice' },

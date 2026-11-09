@@ -84,6 +84,7 @@ describe.skipIf(!run)('API (End-to-End)', () => {
       if (method === 'guild.roles') return [{ id: guildId, name: '@everyone' }];
       if (method === 'mod.action') return { caseNumber: 1, type: params.type, userId: params.userId };
       if (method === 'guild.member') return null;
+      if (method === 'message.send') return { messageId: '910000000000000123', url: 'https://discord.com/channels/x' };
       throw new Error(`unerwartet: ${method}`);
     });
 
@@ -168,6 +169,13 @@ describe.skipIf(!run)('API (End-to-End)', () => {
     const res = await req('POST', `/guilds/${guildId}/moderation/actions`, { type: 'WARN', userId: '910000000000000077', reason: 'Test' });
     expect(res.status).toBe(201);
     expect(res.body).toMatchObject({ caseNumber: 1, type: 'WARN' });
+  });
+
+  it('Nachricht als Bot senden', async () => {
+    const res = await req('POST', `/guilds/${guildId}/messages`, { channelId: '910000000000000050', payload: { content: 'Hallo!' } });
+    expect(res.status).toBe(201);
+    expect(res.body.messageId).toBe('910000000000000123');
+    expect((await req('POST', `/guilds/${guildId}/messages`, { channelId: 'kein-kanal', payload: {} })).status).toBe(400);
   });
 
   it('Dashboard-Berechtigungen und Audit-Log', async () => {

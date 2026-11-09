@@ -27,6 +27,7 @@ import { voiceRouter } from './routes/voice';
 import { logsRouter } from './routes/logs';
 import { modulesRouter } from './routes/modules';
 import { settingsRouter } from './routes/settings';
+import { messagesRouter } from './routes/messages';
 
 const log = childLogger('api');
 
@@ -98,6 +99,7 @@ export function createApp() {
   guild.use('/logs', logsRouter);
   guild.use('/modules', modulesRouter);
   guild.use('/settings', settingsRouter);
+  guild.use('/messages', messagesRouter);
 
   api.use('/guilds', requireAuth, guildsRouter);
   api.use('/guilds/:guildId', requireAuth, guild);

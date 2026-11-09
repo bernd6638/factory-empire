@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <radialGradient id="bg" cx="0.5" cy="0.5" r="0.75"><stop offset="0" stop-color="#1e1b4b"/><stop offset="1" stop-color="#0d0e12"/></radialGradient>
+    <linearGradient id="t" gradientUnits="userSpaceOnUse" x1="330" y1="0" x2="700" y2="0"><stop offset="0" stop-color="#818cf8"/><stop offset="1" stop-color="#c084fc"/></linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="18" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <rect x="190" y="250" width="644" height="524" rx="64" fill="#14161c" stroke="#333845" stroke-width="10"/>
+  <circle cx="262" cy="318" r="20" fill="#f87171"/><circle cx="322" cy="318" r="20" fill="#fbbf24"/><circle cx="382" cy="318" r="20" fill="#34d399"/>
+  <g filter="url(#glow)" stroke="url(#t)" stroke-width="56" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M330 470 L450 560 L330 650"/>
+    <path d="M520 650 H700"/>
+  </g>
+</svg>
