@@ -110,6 +110,26 @@ export const messagesModule: BotModule = {
       await ctx.logs.write({ guildId: input.guildId, category: 'server', type: 'bot_message', summary: `Nachricht als Bot in <#${ch.id}> gesendet`, actorId: input.actorId, channelId: ch.id, data: { messageId: msg.id } });
       return { messageId: msg.id, url: msg.url };
     },
+    /** Schnell-Umfrage (Quick Action): native Discord-Umfrage senden */
+    async 'message.poll'(p, ctx) {
+      const input = parse(
+        z.object({
+          guildId: snowflake,
+          channelId: snowflake,
+          actorId: snowflake,
+          question: z.string().min(1).max(300),
+          answers: z.array(z.string().min(1).max(55)).min(2).max(10),
+          durationHours: z.number().int().min(1).max(768).default(24),
+          allowMultiselect: z.boolean().default(false),
+        }),
+        p,
+      );
+      const ch = await channelFor(ctx, input.guildId, input.channelId);
+      if (!ch.permissionsFor(ch.guild.members.me!)?.has(PermissionFlagsBits.SendPolls)) throw new RpcError('MISSING_PERMISSIONS', 'Dem Bot fehlt die Berechtigung „Umfragen erstellen“.');
+      const msg = await ch.send({ poll: { question: { text: input.question }, answers: input.answers.map((text) => ({ text })), duration: input.durationHours, allowMultiselect: input.allowMultiselect } });
+      await ctx.logs.write({ guildId: input.guildId, category: 'server', type: 'bot_message', summary: `Umfrage „${input.question}“ in <#${ch.id}> gestartet`, actorId: input.actorId, channelId: ch.id, data: { messageId: msg.id } });
+      return { messageId: msg.id, url: msg.url };
+    },
     async 'message.edit'(p, ctx) {
       const input = parse(z.object({ guildId: snowflake, messageId: snowflake, actorId: snowflake, payload: messagePayloadSchema }), p);
       const row = await prisma.moduleData.findUnique({ where: { guildId_moduleKey_key: { guildId: input.guildId, moduleKey: MODULE_KEY, key: input.messageId } } });

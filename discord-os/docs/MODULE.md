@@ -136,3 +136,34 @@ Join-to-Create-Kanäle: Wer beitritt, bekommt einen eigenen Kanal mit Namensvorl
 | `/voice lock` · `/voice unlock` | Sperren (abschaltbar) |
 | `/voice claim` | Kanal übernehmen, wenn der Besitzer weg ist |
 | `/voice transfer mitglied` · `/voice kick mitglied` | Besitz übertragen, Mitglied entfernen |
+
+## Giveaways (Giveaway Manager 2.0)
+
+Gewinnspiele werden im Dashboard erstellt: Preis, Beschreibung, Bild, Farbe, Anzahl Gewinner, sofortiger oder geplanter Start, Ende und Erinnerung vor dem Ende. Der Bot veröffentlicht sie im gewählten Kanal. Mitglieder nehmen per Button teil, ein zweiter Klick zieht die Teilnahme zurück.
+
+- **Teilnahmebedingungen:** benötigte Rollen (eine davon), ausgeschlossene Rollen, Mindestdauer auf dem Server, Mindestalter des Discord-Kontos, nur verifizierte Mitglieder (Membership Screening), maximale Teilnehmerzahl.
+- **Steuerung:** pausieren (die pausierte Zeit wird ans Ende angehängt), fortsetzen, verlängern, vorzeitig beenden, abbrechen, archivieren, löschen.
+- **Gewinner:** automatische Ziehung zum Endzeitpunkt, Bekanntgabe im Kanal (Antwort auf das Gewinnspiel) und optional per DM. Ersatzgewinner: einen Gewinner ersetzen oder einen zusätzlichen ziehen.
+- **Manipulationsschutz (Commit-Reveal):** Beim Erstellen wird ein geheimer 256-Bit-Zufallswert erzeugt, im Embed steht nur seine SHA-256-Prüfsumme. Nach dem Ende wird er offengelegt. Die Reihenfolge ergibt sich aus `HMAC-SHA256(seed, userId)` aufsteigend. Wer den Server verlassen hat, wird übersprungen. Unter „Fairness-Nachweis“ ist alles nachrechenbar.
+- **Dashboard:** aktive, geplante, beendete und archivierte Gewinnspiele mit Live-Countdown und Live-Teilnehmerzahl. Pro Gewinnspiel ein Teilnahmeverlauf (Diagramm), eine Teilnehmerliste mit Suche und eine Gewinnerübersicht. Dazu Statistiken: Teilnahmen, einzigartige Teilnehmer, Top-Teilnehmer.
+- **Einstellungen:** Button-Text und -Emoji, Rolle, die beim Start angepingt wird, Gewinner-DM sowie Vorlagen für die Bekanntgabe und die Erinnerung.
+
+## Control Center
+
+Die Startseite des Dashboards zeigt live:
+
+- Status von Bot, Backend, PostgreSQL und Redis, jeweils mit Antwortzeit
+- einen Health-Score, berechnet aus Dienststatus und Warnungen
+- Kennzahlen mit Verlauf
+- Systemwarnungen: Bot offline, fehlende Rechte, Modulfehler, Raid-Sperre, fehlerhafte Automatisierungen
+- Live-Aktivität, laufende Gewinnspiele, offene Tickets, anstehende und letzte Automatisierungen, Modulstatus
+- Schnellaktionen
+
+Welche Widgets angezeigt werden, legst du über „Widgets“ fest.
+
+## Oberfläche
+
+- **Globale Suche** (Strg/⌘ + K): Seiten, Schnellaktionen und Mitglieder.
+- **Benachrichtigungszentrum:** Moderationsfälle, Auto-Mod, Raids, neue Tickets, beendete Gewinnspiele und fehlgeschlagene Automatisierungen, jeweils live.
+- **Schnellaktionen:** Gewinnspiel erstellen, Umfrage sofort starten, Nachricht senden, Moderationsaktion, Automatisierung erstellen, Statistiken öffnen.
+- **Sidebar:** Kategorien einklappbar, die ganze Sidebar lässt sich zur Icon-Leiste verkleinern. Die Einstellungen werden im Browser gespeichert.

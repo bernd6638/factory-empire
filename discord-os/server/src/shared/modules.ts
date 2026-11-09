@@ -315,6 +315,16 @@ export const loggingSchema = z.object({
   retentionDays: z.number().int().min(1).max(365).default(90),
 });
 
+// ─────────────── Giveaways ───────────────
+export const giveawaysSchema = z.object({
+  buttonLabel: text(40, 'Teilnehmen'),
+  buttonEmoji: text(32, '🎉'),
+  dmWinners: z.boolean().default(true),
+  pingRoleId: optId,
+  announceTemplate: text(1000, '🎉 Glückwunsch {winners}! Ihr habt **{prize}** gewonnen.'),
+  reminderTemplate: text(500, '⏰ Nur noch {time} – letzte Chance für **{prize}**!'),
+});
+
 // ─────────────── Registry ───────────────
 
 export const MODULES = {
@@ -381,6 +391,14 @@ export const MODULES = {
     category: 'Werkzeuge',
     defaultEnabled: true,
     schema: automationSchema,
+  },
+  giveaways: {
+    name: 'Giveaways',
+    description: 'Gewinnspiele mit Teilnahmebedingungen, fairer Ziehung, Ersatzgewinnern und Statistiken.',
+    icon: 'Gift',
+    category: 'Community',
+    defaultEnabled: true,
+    schema: giveawaysSchema,
   },
   voice: {
     name: 'Voice-Manager',

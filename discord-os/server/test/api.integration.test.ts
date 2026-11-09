@@ -84,6 +84,10 @@ describe.skipIf(!run)('API (End-to-End)', () => {
       if (method === 'guild.roles') return [{ id: guildId, name: '@everyone' }];
       if (method === 'mod.action') return { caseNumber: 1, type: params.type, userId: params.userId };
       if (method === 'guild.member') return null;
+      if (method === 'giveaway.publish') {
+        const g = await prisma.giveaway.update({ where: { id: params.id }, data: { status: 'ACTIVE', messageId: '910000000000000999' } });
+        return { id: g.id, status: g.status };
+      }
       if (method === 'message.send') return { messageId: '910000000000000123', url: 'https://discord.com/channels/x' };
       throw new Error(`unerwartet: ${method}`);
     });
@@ -99,6 +103,7 @@ describe.skipIf(!run)('API (End-to-End)', () => {
     server?.close();
     await fakeBot?.close();
     await prisma.automation.deleteMany({ where: { guildId } });
+    await prisma.giveaway.deleteMany({ where: { guildId } });
     await prisma.shopItem.deleteMany({ where: { guildId } });
     await prisma.guild.deleteMany({ where: { id: guildId } });
     await prisma.dashboardPermission.deleteMany({ where: { guildId } });
@@ -176,6 +181,35 @@ describe.skipIf(!run)('API (End-to-End)', () => {
     expect(res.status).toBe(201);
     expect(res.body.messageId).toBe('910000000000000123');
     expect((await req('POST', `/guilds/${guildId}/messages`, { channelId: 'kein-kanal', payload: {} })).status).toBe(400);
+  });
+
+  it('Giveaways: Erstellen, Statistik, Nachweis der Ziehung', async () => {
+    const created = await req('POST', `/guilds/${guildId}/giveaways`, { channelId: '910000000000000050', prize: 'Discord Nitro', winnerCount: 2, endsAt: new Date(Date.now() + 3_600_000).toISOString() });
+    expect(created.status).toBe(201);
+    expect(created.body.status).toBe('ACTIVE');
+    const list = await req('GET', `/guilds/${guildId}/giveaways?view=active`);
+    expect(list.body).toHaveLength(1);
+    expect(list.body[0].seed).toBeNull(); // Seed bleibt bis zum Ende geheim
+    const id = list.body[0].id;
+    await prisma.giveawayEntry.createMany({ data: ['1', '2', '3'].map((n) => ({ giveawayId: id, userId: `91000000000000010${n}` })) });
+    expect((await req('GET', `/guilds/${guildId}/giveaways/${id}/verify`)).status).toBe(400);
+    await prisma.giveaway.update({ where: { id }, data: { status: 'ENDED' } });
+    const proof = await req('GET', `/guilds/${guildId}/giveaways/${id}/verify`);
+    expect(proof.body.hashMatches).toBe(true);
+    expect(proof.body.order).toHaveLength(3);
+    const stats = await req('GET', `/guilds/${guildId}/giveaways/stats`);
+    expect(stats.body).toMatchObject({ total: 1, totalEntries: 3, uniqueParticipants: 3 });
+    expect((await req('POST', `/guilds/${guildId}/giveaways`, { channelId: '910000000000000050', prize: 'X', endsAt: new Date(Date.now() - 1000).toISOString() })).status).toBe(400);
+    expect((await req('DELETE', `/guilds/${guildId}/giveaways/${id}`)).status).toBe(200);
+  });
+
+  it('Control Center liefert Systemstatus und Warnungen', async () => {
+    const res = await req('GET', `/guilds/${guildId}/control`);
+    expect(res.status).toBe(200);
+    expect(res.body.system.database.ok).toBe(true);
+    expect(res.body.system.redis.ok).toBe(true);
+    expect(res.body.modules.giveaways).toBe(true);
+    expect(Array.isArray(res.body.warnings)).toBe(true);
   });
 
   it('Dashboard-Berechtigungen und Audit-Log', async () => {

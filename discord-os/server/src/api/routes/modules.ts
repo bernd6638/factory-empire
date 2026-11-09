@@ -39,6 +39,8 @@ async function dataStats(guildId: string, key: ModuleKey): Promise<Record<string
       };
     case 'automation':
       return { Regeln: await prisma.automation.count({ where: { guildId } }), Erinnerungen: await prisma.reminder.count({ where: { guildId, done: false } }) };
+    case 'giveaways':
+      return { Gewinnspiele: await prisma.giveaway.count({ where: { guildId } }), Teilnahmen: await prisma.giveawayEntry.count({ where: { giveaway: { guildId } } }) };
     case 'voice':
       return { 'Aktive temporäre Kanäle': await prisma.tempVoiceChannel.count({ where: { guildId } }) };
     default:
@@ -175,6 +177,9 @@ modulesRouter.post('/:key/data/reset', guildAccess('OWNER'), async (req, res) =>
         prisma.economyAccount.deleteMany({ where: { guildId } }),
         prisma.company.deleteMany({ where: { guildId } }),
       ]);
+      break;
+    case 'giveaways':
+      await prisma.giveaway.deleteMany({ where: { guildId, status: { in: ['ENDED', 'CANCELLED'] } } });
       break;
     case 'automation':
       await prisma.automation.deleteMany({ where: { guildId } });

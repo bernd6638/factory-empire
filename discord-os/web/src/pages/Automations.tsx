@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlarmClock, ArrowDown, Bell, CalendarClock, CheckCircle2, Clock, FlaskConical, HandHeart, Pencil, Play, Plus, Settings2, Trash2, Workflow, XCircle, Zap } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import type { AutomationAction, TriggerType } from '@shared/automation';
 import { api } from '../lib/api';
 import { dateTime, relative } from '../lib/format';
@@ -316,7 +317,15 @@ function RulesTab() {
   const toast = useToast();
   const confirm = useConfirm();
   const isAdmin = useCan('ADMIN');
-  const [edit, setEdit] = useState<Partial<Rule> | null | undefined>(undefined);
+  const [params, setParams] = useSearchParams();
+  const [edit, setEdit] = useState<Partial<Rule> | null | undefined>(params.get('new') ? null : undefined);
+  useEffect(() => {
+    if (params.get('new')) {
+      setEdit(null);
+      params.delete('new');
+      setParams(params, { replace: true });
+    }
+  }, [params, setParams]);
   const { data, isLoading } = useQuery({ queryKey: ['automations', guildId], queryFn: () => api.get<Rule[]>(`/guilds/${guildId}/automations`) });
   const toggle = useMutation({ mutationFn: (id: number) => api.post(`/guilds/${guildId}/automations/${id}/toggle`), onSuccess: () => void qc.invalidateQueries({ queryKey: ['automations'] }), onError: toast.error });
   const del = useMutation({ mutationFn: (id: number) => api.del(`/guilds/${guildId}/automations/${id}`), onSuccess: () => (toast.success('Gelöscht'), void qc.invalidateQueries({ queryKey: ['automations'] })), onError: toast.error });

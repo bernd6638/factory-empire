@@ -20,6 +20,7 @@ import { welcomeModule } from './modules/welcome';
 import { voiceModule } from './modules/voice';
 import { loggingModule } from './modules/logging';
 import { messagesModule } from './modules/messages';
+import { giveawaysModule } from './modules/giveaways';
 
 const log = childLogger('bot');
 
@@ -78,7 +79,7 @@ export async function startBot(): Promise<() => Promise<void>> {
   };
 
   const manager = new ModuleManager(ctx);
-  manager.register(coreModule, moderationModule, automodModule, loggingModule, levelingModule, welcomeModule, ticketsModule, economyModule, automationModule, voiceModule, messagesModule);
+  manager.register(coreModule, moderationModule, automodModule, loggingModule, levelingModule, welcomeModule, ticketsModule, economyModule, automationModule, voiceModule, messagesModule, giveawaysModule);
   manager.register({
     id: 'core',
     rpc: {

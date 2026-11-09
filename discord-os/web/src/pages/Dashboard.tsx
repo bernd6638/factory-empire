@@ -106,7 +106,7 @@ export default function DashboardPage() {
   return (
     <>
       <PageHeader
-        title="Dashboard"
+        title="Live Analytics"
         icon={Gauge}
         description={`Überblick über ${guild?.name ?? 'deinen Server'}`}
         actions={

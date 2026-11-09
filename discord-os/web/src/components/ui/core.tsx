@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ChevronDown, Loader2, type LucideIcon } from 'lucide-react';
+import { AlertTriangle, ChevronDown, Loader2, type LucideIcon } from 'lucide-react';
 import { forwardRef, useEffect, useId, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 import { cn } from '../../lib/format';
 
@@ -39,10 +39,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
 export function Card({ className, children, delay = 0, hover }: { className?: string; children: ReactNode; delay?: number; hover?: boolean }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay, ease: [0.22, 1, 0.36, 1] }}
-      className={cn('card', hover && 'transition-colors hover:border-line-strong', className)}
+      transition={{ duration: 0.4, delay, ease: [0.22, 1, 0.36, 1] }}
+      className={cn('card', hover && 'card-hover', className)}
     >
       {children}
     </motion.div>
@@ -170,25 +170,89 @@ export function Spinner({ className }: { className?: string }) {
 }
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse rounded-lg bg-panel-3/70', className)} />;
+  return <div className={cn('skeleton', className)} />;
 }
 
-export function LoadingBlock({ label = 'Lädt …', className }: { label?: string; className?: string }) {
+/** Ladezustand als Skeleton-Layout (Kopfzeile, Kennzahlen, Inhalt). */
+export function LoadingBlock({ label = 'Lädt …', className, compact }: { label?: string; className?: string; compact?: boolean }) {
+  if (compact) {
+    return (
+      <div className={cn('space-y-3 p-5', className)} aria-busy="true" aria-label={label}>
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-3">
+            <Skeleton className="h-9 w-9 rounded-full" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-3 w-1/3" />
+              <Skeleton className="h-3 w-2/3" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
   return (
-    <div className={cn('flex items-center justify-center gap-3 py-16 text-sm text-fg-muted', className)}>
-      <Spinner /> {label}
+    <div className={cn('space-y-4 py-2', className)} aria-busy="true" aria-label={label}>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="card space-y-3 p-5">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-8 w-32" />
+            <Skeleton className="h-3 w-20" />
+          </div>
+        ))}
+      </div>
+      <div className="grid gap-4 xl:grid-cols-3">
+        <div className="card space-y-4 p-5 xl:col-span-2">
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-56 w-full" />
+        </div>
+        <div className="card space-y-3 p-5">
+          <Skeleton className="h-4 w-32" />
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-8 w-full" />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Illustration für Leerzustände: Orbit-Ringe mit Symbol im Zentrum. */
+function EmptyIllustration({ icon: Icon }: { icon: LucideIcon }) {
+  return (
+    <div className="relative mb-6 h-36 w-36">
+      <svg viewBox="0 0 144 144" className="absolute inset-0 h-full w-full" aria-hidden>
+        <defs>
+          <linearGradient id="emptyRing" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#7d8dff" stopOpacity="0.7" />
+            <stop offset="1" stopColor="#c084fc" stopOpacity="0.15" />
+          </linearGradient>
+          <radialGradient id="emptyGlow" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stopColor="#5865ff" stopOpacity="0.35" />
+            <stop offset="1" stopColor="#5865ff" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        <circle cx="72" cy="72" r="70" fill="url(#emptyGlow)" />
+        <circle cx="72" cy="72" r="60" fill="none" stroke="url(#emptyRing)" strokeWidth="1" strokeDasharray="3 6" />
+        <circle cx="72" cy="72" r="44" fill="none" stroke="url(#emptyRing)" strokeWidth="1" />
+        <g className="origin-center animate-spin-slow" style={{ transformOrigin: '72px 72px' }}>
+          <circle cx="132" cy="72" r="3.5" fill="#a9b5ff" />
+          <circle cx="28" cy="72" r="2.5" fill="#c084fc" />
+        </g>
+      </svg>
+      <div className="absolute inset-[38px] flex items-center justify-center rounded-2xl border border-brand-500/30 bg-gradient-to-br from-brand-500/25 to-accent-500/10 shadow-glow">
+        <Icon className="h-7 w-7 text-brand-300" />
+      </div>
     </div>
   );
 }
 
 export function EmptyState({ icon: Icon, title, description, action }: { icon: LucideIcon; title: string; description?: ReactNode; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center justify-center px-6 py-14 text-center">
-      <div className="mb-4 rounded-2xl bg-gradient-to-br from-brand-500/15 to-accent-500/10 p-4 ring-1 ring-brand-500/20">
-        <Icon className="h-6 w-6 text-brand-300" />
-      </div>
-      <h4 className="font-semibold">{title}</h4>
-      {description && <p className="mt-1 max-w-sm text-sm text-fg-muted">{description}</p>}
+    <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
+      <EmptyIllustration icon={Icon} />
+      <h4 className="text-base font-semibold">{title}</h4>
+      {description && <p className="mt-1.5 max-w-sm text-sm leading-relaxed text-fg-muted">{description}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>
   );
@@ -197,13 +261,21 @@ export function EmptyState({ icon: Icon, title, description, action }: { icon: L
 export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
   const msg = error instanceof Error ? error.message : 'Unbekannter Fehler';
   return (
-    <div className="flex flex-col items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/5 px-6 py-8 text-center">
-      <p className="text-sm text-red-300">{msg}</p>
-      {onRetry && (
-        <Button size="sm" onClick={onRetry}>
-          Erneut versuchen
-        </Button>
-      )}
+    <div className="relative overflow-hidden rounded-2xl border border-red-500/25 bg-gradient-to-br from-red-500/10 via-red-500/[0.03] to-transparent px-6 py-8">
+      <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:text-left">
+        <div className="rounded-xl bg-red-500/15 p-3 ring-1 ring-red-500/30">
+          <AlertTriangle className="h-5 w-5 text-red-300" />
+        </div>
+        <div className="flex-1">
+          <div className="font-medium text-red-200">Das hat nicht geklappt</div>
+          <p className="text-sm text-red-300/80">{msg}</p>
+        </div>
+        {onRetry && (
+          <Button size="sm" variant="danger" onClick={onRetry}>
+            Erneut versuchen
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
@@ -239,31 +311,56 @@ export function PageHeader({ title, description, icon: Icon, actions }: { title:
   );
 }
 
-export function StatCard({ label, value, icon: Icon, hint, accent = 'brand', delay = 0, live }: { label: string; value: ReactNode; icon: LucideIcon; hint?: ReactNode; accent?: 'brand' | 'violet' | 'green' | 'yellow' | 'red' | 'blue'; delay?: number; live?: boolean }) {
-  const accents = {
-    brand: 'from-brand-500/20 text-brand-300 ring-brand-500/25',
-    violet: 'from-accent-500/20 text-accent-400 ring-accent-500/25',
-    green: 'from-emerald-500/20 text-emerald-300 ring-emerald-500/25',
-    yellow: 'from-amber-500/20 text-amber-300 ring-amber-500/25',
-    red: 'from-red-500/20 text-red-300 ring-red-500/25',
-    blue: 'from-sky-500/20 text-sky-300 ring-sky-500/25',
-  };
+const ACCENTS = {
+  brand: { icon: 'from-brand-500/25 text-brand-300 ring-brand-500/30', line: '#7d8dff', glow: 'rgb(88 101 255 / 0.16)' },
+  violet: { icon: 'from-accent-500/25 text-accent-400 ring-accent-500/30', line: '#c084fc', glow: 'rgb(168 85 247 / 0.16)' },
+  green: { icon: 'from-emerald-500/25 text-emerald-300 ring-emerald-500/30', line: '#34d399', glow: 'rgb(16 185 129 / 0.14)' },
+  yellow: { icon: 'from-amber-500/25 text-amber-300 ring-amber-500/30', line: '#fbbf24', glow: 'rgb(245 158 11 / 0.14)' },
+  red: { icon: 'from-red-500/25 text-red-300 ring-red-500/30', line: '#f87171', glow: 'rgb(239 68 68 / 0.14)' },
+  blue: { icon: 'from-electric-500/25 text-electric-400 ring-electric-500/30', line: '#38bdf8', glow: 'rgb(14 165 233 / 0.14)' },
+} as const;
+
+/** Mini-Liniendiagramm (SVG, ohne Bibliothek – sehr leichtgewichtig). */
+export function Sparkline({ data, color = '#7d8dff', className }: { data: number[]; color?: string; className?: string }) {
+  const id = useId();
+  if (data.length < 2) return null;
+  const max = Math.max(...data, 1);
+  const min = Math.min(...data, 0);
+  const pts = data.map((v, i) => [(i / (data.length - 1)) * 100, 28 - ((v - min) / (max - min || 1)) * 26]);
+  const line = pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x!.toFixed(1)},${y!.toFixed(1)}`).join(' ');
   return (
-    <Card delay={delay} hover className="relative overflow-hidden p-5">
-      <div className="pointer-events-none absolute -top-12 -right-12 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgb(99_102_241/0.12),transparent_70%)]" />
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="flex items-center gap-2 text-xs font-medium tracking-wide text-fg-muted uppercase">
+    <svg viewBox="0 0 100 30" preserveAspectRatio="none" className={cn('h-9 w-full', className)} aria-hidden>
+      <defs>
+        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={color} stopOpacity="0.35" />
+          <stop offset="1" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={`${line} L100,30 L0,30 Z`} fill={`url(#${id})`} />
+      <path d={line} fill="none" stroke={color} strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+    </svg>
+  );
+}
+
+export function StatCard({ label, value, icon: Icon, hint, accent = 'brand', delay = 0, live, spark }: { label: string; value: ReactNode; icon: LucideIcon; hint?: ReactNode; accent?: keyof typeof ACCENTS; delay?: number; live?: boolean; spark?: number[] }) {
+  const a = ACCENTS[accent];
+  return (
+    <Card delay={delay} hover className="group overflow-hidden">
+      <div className="pointer-events-none absolute -top-16 -right-16 h-44 w-44 rounded-full" style={{ background: `radial-gradient(circle, ${a.glow}, transparent 70%)` }} />
+      <div className="relative p-5 pb-4">
+        <div className="flex items-start justify-between gap-3">
+          <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.08em] text-fg-muted uppercase">
             {label}
-            {live && <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-emerald-400" />}
+            {live && <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />}
           </p>
-          <p className="mt-2 text-[28px] leading-none font-semibold tracking-tight tabular-nums">{value}</p>
-          {hint && <p className="mt-2 text-xs text-fg-subtle">{hint}</p>}
+          <div className={cn('rounded-xl bg-gradient-to-br to-transparent p-2.5 ring-1 transition-transform duration-300 group-hover:scale-110', a.icon)}>
+            <Icon className="h-[18px] w-[18px]" />
+          </div>
         </div>
-        <div className={cn('rounded-xl bg-gradient-to-br to-transparent p-2.5 ring-1', accents[accent])}>
-          <Icon className="h-5 w-5" />
-        </div>
+        <p className="mt-1 text-[32px] leading-none font-semibold tracking-tight tabular-nums">{value}</p>
+        {hint && <p className="mt-2.5 text-xs text-fg-subtle">{hint}</p>}
       </div>
+      {spark && spark.length > 1 && <Sparkline data={spark} color={a.line} className="-mt-1 opacity-80" />}
     </Card>
   );
 }

@@ -8,6 +8,7 @@ import type { GuildListItem } from '../lib/types';
 import { Avatar, Badge, Button, EmptyState, ErrorState, Input, Skeleton } from '../components/ui/core';
 import { BotStatusPill } from '../components/layout/AppLayout';
 import { useMe } from '../components/layout/AuthGate';
+import { LogoMark } from '../components/layout/Logo';
 
 const ACCESS_LABEL = { OWNER: 'Besitzer', ADMIN: 'Admin', MODERATOR: 'Moderator', VIEWER: 'Betrachter', NONE: '' } as const;
 
@@ -32,9 +33,9 @@ export function ServersPage() {
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
       <div className="mb-10 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 font-bold text-white shadow-glow">OS</div>
+          <LogoMark size={40} />
           <div>
-            <div className="font-semibold">Discord OS</div>
+            <div className="font-bold tracking-[0.14em]">DISCORD <span className="gradient-text">OS</span></div>
             <div className="text-xs text-fg-subtle">Angemeldet als {me?.globalName ?? me?.username}</div>
           </div>
         </div>

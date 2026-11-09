@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Activity, Bot, Coins, ShieldCheck, Ticket, Workflow } from 'lucide-react';
 import { useSearchParams, Navigate } from 'react-router-dom';
 import { useMe } from '../components/layout/AuthGate';
+import { LogoMark } from '../components/layout/Logo';
 
 const ERRORS: Record<string, string> = {
   denied: 'Die Anmeldung wurde abgebrochen.',
@@ -40,7 +41,7 @@ export function LoginPage() {
       <div className="relative grid w-full max-w-5xl items-center gap-10 lg:grid-cols-2">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-xs text-brand-300">
-            <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-brand-400" /> Discord OS 1.0
+            <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-brand-400" /> DISCORD OS · Control Center
           </div>
           <h1 className="text-4xl leading-tight font-semibold tracking-tight sm:text-5xl">
             Dein Discord-Server.
@@ -63,7 +64,7 @@ export function LoginPage() {
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="card mx-auto w-full max-w-md p-8 shadow-glow">
           <div className="mb-8 flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-accent-500 text-lg font-bold text-white shadow-glow">OS</div>
+            <LogoMark size={48} />
             <div>
               <div className="text-lg font-semibold">Anmelden</div>
               <div className="text-sm text-fg-muted">Mit deinem Discord-Konto</div>

@@ -28,6 +28,8 @@ import { logsRouter } from './routes/logs';
 import { modulesRouter } from './routes/modules';
 import { settingsRouter } from './routes/settings';
 import { messagesRouter } from './routes/messages';
+import { giveawaysRouter } from './routes/giveaways';
+import { controlRouter } from './routes/control';
 
 const log = childLogger('api');
 
@@ -100,6 +102,8 @@ export function createApp() {
   guild.use('/modules', modulesRouter);
   guild.use('/settings', settingsRouter);
   guild.use('/messages', messagesRouter);
+  guild.use('/giveaways', giveawaysRouter);
+  guild.use('/control', controlRouter);
 
   api.use('/guilds', requireAuth, guildsRouter);
   api.use('/guilds/:guildId', requireAuth, guild);

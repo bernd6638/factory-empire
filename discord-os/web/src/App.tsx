@@ -7,6 +7,8 @@ import { LoginPage } from './pages/Login';
 import { ServersPage } from './pages/Servers';
 
 const DashboardPage = lazy(() => import('./pages/Dashboard'));
+const ControlCenterPage = lazy(() => import('./pages/ControlCenter'));
+const GiveawaysPage = lazy(() => import('./pages/Giveaways'));
 const ServerPage = lazy(() => import('./pages/Server'));
 const MembersPage = lazy(() => import('./pages/Members'));
 const ModerationPage = lazy(() => import('./pages/Moderation'));
@@ -50,7 +52,9 @@ export function App() {
             </AuthGate>
           }
         >
-          <Route index element={<Suspense fallback={<LoadingBlock />}><DashboardPage /></Suspense>} />
+          <Route index element={<Suspense fallback={<LoadingBlock />}><ControlCenterPage /></Suspense>} />
+          <Route path="analytics" element={<Suspense fallback={<LoadingBlock />}><DashboardPage /></Suspense>} />
+          <Route path="giveaways" element={<Suspense fallback={<LoadingBlock />}><GiveawaysPage /></Suspense>} />
           <Route path="server" element={<Suspense fallback={<LoadingBlock />}><ServerPage /></Suspense>} />
           <Route path="members" element={<Suspense fallback={<LoadingBlock />}><MembersPage /></Suspense>} />
           <Route path="moderation" element={<Suspense fallback={<LoadingBlock />}><ModerationPage /></Suspense>} />

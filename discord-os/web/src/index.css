@@ -3,31 +3,39 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Discord OS – Design-Tokens (Anthrazit, Indigo/Violett-Akzente) */
+/*
+ * DISCORD OS – Designsystem 2.0
+ * Tiefes Schwarz/Anthrazit, elektrisches Blau + Violett, dezentes Glas, Lichtkanten.
+ * Performance: Unschärfe (backdrop-filter) nur auf wenigen fixierten Flächen (Topbar, Dialoge).
+ */
 @theme {
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
-  --color-base: #0d0e12;
-  --color-panel: #14161c;
-  --color-panel-2: #1a1d24;
-  --color-panel-3: #22262f;
-  --color-line: #262a34;
-  --color-line-strong: #333845;
-  --color-fg: #e8eaf0;
-  --color-fg-muted: #9aa1b2;
-  --color-fg-subtle: #6b7286;
+  --color-base: #06070a;
+  --color-panel: #0d0f14;
+  --color-panel-2: #13161d;
+  --color-panel-3: #1a1e27;
+  --color-line: #1f2430;
+  --color-line-strong: #2c3240;
+  --color-fg: #eef0f6;
+  --color-fg-muted: #9ca3b8;
+  --color-fg-subtle: #646b80;
 
-  --color-brand-300: #a5b4fc;
-  --color-brand-400: #818cf8;
-  --color-brand-500: #6366f1;
-  --color-brand-600: #4f46e5;
+  --color-brand-300: #a9b5ff;
+  --color-brand-400: #7d8dff;
+  --color-brand-500: #5865ff;
+  --color-brand-600: #4350f0;
   --color-accent-400: #c084fc;
   --color-accent-500: #a855f7;
+  --color-electric-400: #38bdf8;
+  --color-electric-500: #0ea5e9;
 
-  --shadow-glow: 0 0 0 1px rgb(99 102 241 / 0.25), 0 8px 32px -8px rgb(99 102 241 / 0.35);
-  --shadow-card: 0 1px 0 0 rgb(255 255 255 / 0.03) inset, 0 12px 32px -16px rgb(0 0 0 / 0.6);
+  --shadow-glow: 0 0 0 1px rgb(88 101 255 / 0.3), 0 10px 40px -10px rgb(88 101 255 / 0.45);
+  --shadow-card: 0 1px 0 0 rgb(255 255 255 / 0.04) inset, 0 20px 40px -24px rgb(0 0 0 / 0.8);
 
   --animate-pulse-soft: pulse-soft 2.4s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.6s ease-in-out infinite;
+  --animate-spin-slow: spin 18s linear infinite;
   @keyframes pulse-soft {
     0%,
     100% {
@@ -35,6 +43,14 @@
     }
     50% {
       opacity: 0.45;
+    }
+  }
+  @keyframes shimmer {
+    0% {
+      background-position: -400px 0;
+    }
+    100% {
+      background-position: 400px 0;
     }
   }
 }
@@ -45,8 +61,9 @@
   }
   body {
     @apply bg-base text-fg font-sans antialiased;
+    font-feature-settings: 'cv11', 'ss01';
   }
-  /* Hintergrund-Verlauf als eigene, fixierte Ebene: wird einmal gezeichnet statt bei jedem Scrollen */
+  /* Hintergrund: Lichtschein + feines Raster als eine fixierte Ebene (einmal gezeichnet) */
   body::before {
     content: '';
     position: fixed;
@@ -54,15 +71,25 @@
     z-index: -1;
     pointer-events: none;
     background-image:
-      radial-gradient(1200px 600px at 10% -10%, rgb(99 102 241 / 0.08), transparent 60%),
-      radial-gradient(900px 500px at 100% 0%, rgb(168 85 247 / 0.06), transparent 60%);
+      radial-gradient(900px 520px at 15% -12%, rgb(88 101 255 / 0.16), transparent 62%),
+      radial-gradient(800px 480px at 105% 5%, rgb(168 85 247 / 0.12), transparent 60%),
+      radial-gradient(700px 500px at 50% 120%, rgb(14 165 233 / 0.07), transparent 60%),
+      linear-gradient(rgb(255 255 255 / 0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.018) 1px, transparent 1px);
+    background-size:
+      auto,
+      auto,
+      auto,
+      48px 48px,
+      48px 48px;
+    mask-image: linear-gradient(to bottom, black 0%, black 70%, transparent 100%);
   }
   ::selection {
-    background: rgb(99 102 241 / 0.4);
+    background: rgb(88 101 255 / 0.45);
   }
   * {
     scrollbar-width: thin;
-    scrollbar-color: #2c313c transparent;
+    scrollbar-color: #262b38 transparent;
   }
   :focus-visible {
     outline: 2px solid var(--color-brand-500);
@@ -71,21 +98,53 @@
 }
 
 @layer components {
+  /* Karte mit Lichtkante oben und weichem Verlauf */
   .card {
-    @apply rounded-2xl border border-line bg-panel;
+    @apply relative rounded-2xl border border-line;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.028), rgb(255 255 255 / 0.008) 40%), var(--color-panel);
     box-shadow: var(--shadow-card);
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0 12% auto 12%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgb(169 181 255 / 0.35), transparent);
+    pointer-events: none;
+  }
+  .card-hover {
+    @apply transition-[border-color,box-shadow,transform] duration-200 hover:border-line-strong;
+  }
+  .card-hover:hover {
+    box-shadow:
+      var(--shadow-card),
+      0 0 0 1px rgb(88 101 255 / 0.12),
+      0 18px 50px -20px rgb(88 101 255 / 0.35);
+  }
+  .glass {
+    background: rgb(10 12 17 / 0.72);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
   }
   .input {
     @apply w-full rounded-xl border border-line bg-panel-2 px-3 py-2 text-sm text-fg placeholder:text-fg-subtle transition
       focus:border-brand-500/70 focus:outline-none focus:ring-2 focus:ring-brand-500/25 disabled:opacity-50;
   }
   .label {
-    @apply mb-1.5 block text-xs font-medium tracking-wide text-fg-muted uppercase;
+    @apply mb-1.5 block text-[11px] font-semibold tracking-[0.08em] text-fg-muted uppercase;
   }
   .gradient-text {
     @apply bg-gradient-to-r from-brand-300 via-brand-400 to-accent-400 bg-clip-text text-transparent;
   }
   .table-row {
-    @apply border-b border-line/60 transition-colors hover:bg-panel-2/60;
+    @apply border-b border-line/60 transition-colors hover:bg-white/[0.025];
+  }
+  .skeleton {
+    background: linear-gradient(90deg, rgb(255 255 255 / 0.03) 0%, rgb(255 255 255 / 0.07) 50%, rgb(255 255 255 / 0.03) 100%);
+    background-size: 800px 100%;
+    @apply animate-shimmer rounded-lg;
+  }
+  .kbd {
+    @apply rounded-md border border-line-strong bg-panel-3 px-1.5 py-0.5 font-mono text-[10px] text-fg-muted;
   }
 }

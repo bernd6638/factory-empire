@@ -458,3 +458,66 @@ model TempVoiceChannel {
 
   @@index([guildId])
 }
+
+// ─────────────────────────── Giveaways ───────────────────────────
+
+enum GiveawayStatus {
+  SCHEDULED
+  ACTIVE
+  PAUSED
+  ENDED
+  CANCELLED
+}
+
+model Giveaway {
+  id              Int            @id @default(autoincrement())
+  guildId         String
+  channelId       String
+  messageId       String?
+  prize           String
+  description     String?
+  imageUrl        String?
+  color           String         @default("#8b5cf6")
+  winnerCount     Int            @default(1)
+  hostId          String
+  status          GiveawayStatus @default(SCHEDULED)
+  startsAt        DateTime
+  endsAt          DateTime
+  pausedAt        DateTime?
+  /// Teilnahmebedingungen
+  requiredRoleIds String[]       @default([])
+  blockedRoleIds  String[]       @default([])
+  minMemberDays   Int            @default(0)
+  minAccountDays  Int            @default(0)
+  requireVerified Boolean        @default(false)
+  maxEntries      Int?
+  reminderMinutes Int            @default(60)
+  reminderSent    Boolean        @default(false)
+  /// Manipulationsschutz (Commit-Reveal): Hash wird bei Erstellung veröffentlicht, Seed nach dem Ende
+  seed            String
+  seedHash        String
+  winners         String[]       @default([])
+  /// Weitere Ziehungsreihenfolge für Ersatzgewinner
+  drawOrder       String[]       @default([])
+  rerolls         Int            @default(0)
+  archived        Boolean        @default(false)
+  countDirty      Boolean        @default(false)
+  endedAt         DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  entries         GiveawayEntry[]
+
+  @@index([guildId, status])
+  @@index([status, endsAt])
+  @@index([status, startsAt])
+}
+
+model GiveawayEntry {
+  giveawayId Int
+  userId     String
+  createdAt  DateTime @default(now())
+  giveaway   Giveaway @relation(fields: [giveawayId], references: [id], onDelete: Cascade)
+
+  @@id([giveawayId, userId])
+  @@index([giveawayId, createdAt])
+}
