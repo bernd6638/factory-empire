@@ -131,25 +131,41 @@ async function processQueue(ctx: BotContext, s: Session) {
       if (!guild) break;
       const { config: cfg } = await ctx.config.get(s.guildId, 'voiceai');
       const t0 = Date.now();
+      const stage = (stage: 'thinking' | 'speaking' | 'done' | 'error', message?: string) => ctx.live(s.guildId, 'voiceai.stage', { stage, message, userId: item.userId, name: item.name, at: Date.now() });
+      stage('thinking');
+      log.info({ guild: s.guildId, model: cfg.model }, 'Sprach-Bot: frage Sprachmodell');
       let answer: string;
       try {
         answer = cleanForSpeech(await chat(cfg, guild.name, s.history, `${item.name}: ${item.text}`));
       } catch (err: any) {
-        log.warn({ err: err?.message }, 'Sprachmodell nicht erreichbar');
+        const msg = String(err?.message ?? err);
+        log.warn({ err: msg, model: cfg.model }, 'Sprachmodell-Anfrage fehlgeschlagen');
+        stage('error', `Sprachmodell (${cfg.model}): ${msg}`);
         answer = 'Mein Sprachmodell ist gerade nicht erreichbar.';
       }
-      if (!answer) continue;
+      if (!answer) {
+        stage('error', `Das Sprachmodell (${cfg.model}) hat eine leere Antwort geliefert.`);
+        continue;
+      }
       const tLlm = Date.now() - t0;
       s.history.push({ role: 'user', content: `${item.name}: ${item.text}` }, { role: 'assistant', content: answer });
       if (s.history.length > cfg.historyTurns * 2) s.history.splice(0, s.history.length - cfg.historyTurns * 2);
       s.turns++;
       s.followUp.set(item.userId, Date.now());
+      // Antwort sofort anzeigen – auch falls die Sprachausgabe danach scheitert
+      ctx.live(s.guildId, 'voiceai.turn', { userId: item.userId, name: item.name, text: item.text, answer, llmMs: tLlm, at: Date.now() });
 
-      const t1 = Date.now();
-      await speak(s, answer, cfg).catch((err) => log.warn({ err: err?.message }, 'Sprachausgabe fehlgeschlagen'));
+      stage('speaking');
+      try {
+        await Promise.race([speak(s, answer, cfg), new Promise((_, rej) => setTimeout(() => rej(new Error('Zeitüberschreitung bei der Sprachausgabe')), 90_000))]);
+      } catch (err: any) {
+        const msg = String(err?.message ?? err);
+        log.warn({ err: msg, voice: cfg.voice }, 'Sprachausgabe fehlgeschlagen');
+        stage('error', `Sprachausgabe (${cfg.voice}): ${msg}`);
+      }
       s.followUp.set(item.userId, Date.now()); // Nachfrage-Fenster ab Ende der Antwort
+      stage('done');
 
-      ctx.live(s.guildId, 'voiceai.turn', { userId: item.userId, name: item.name, text: item.text, answer, llmMs: tLlm, ttsMs: Date.now() - t1, at: Date.now() });
       if (cfg.transcriptChannelId) {
         const ch = await getSendableChannel(guild, cfg.transcriptChannelId);
         await ch?.send({ content: `🗣️ **${item.name}:** ${truncate(item.text, 900)}\n🤖 **${cfg.botName}:** ${truncate(answer, 900)}`, allowedMentions: { parse: [] } }).catch(() => undefined);
@@ -173,6 +189,7 @@ async function handleUtterance(ctx: BotContext, s: Session, userId: string, pcm4
     text = await transcribe(wavEncode(pcm16, 16000, 1), cfg.language);
   } catch (err: any) {
     log.warn({ err: err?.message }, 'Spracherkennung nicht erreichbar');
+    ctx.live(s.guildId, 'voiceai.stage', { stage: 'error', message: `Spracherkennung: ${String(err?.message ?? err)}`, userId, at: Date.now() });
     return;
   }
   if (!text || text.length < 2) return;
@@ -186,6 +203,7 @@ async function handleUtterance(ctx: BotContext, s: Session, userId: string, pcm4
 
   const content = wake.hit ? wake.rest || 'Ja?' : text;
   // Nicht mehr als 3 Fragen stapeln – sonst antwortet der Bot noch Minuten später
+  s.followUp.set(userId, Date.now());
   if (s.queue.length < 3) s.queue.push({ userId, name, text: content });
   void processQueue(ctx, s);
 }

@@ -24,7 +24,7 @@ interface Status {
 
 interface Line {
   id: string;
-  kind: 'heard' | 'turn';
+  kind: 'heard' | 'turn' | 'error';
   name: string;
   text: string;
   answer?: string;
@@ -73,12 +73,21 @@ function LiveTab() {
   const [lines, setLines] = useState<Line[]>([]);
   const [ask, setAsk] = useState('');
   const [answer, setAnswer] = useState<{ answer: string; ms: number } | null>(null);
+  const [stage, setStage] = useState<{ stage: 'thinking' | 'speaking'; name: string; at: number } | null>(null);
   const m = useModuleConfig('voiceai');
   const { data, isLoading, refetch } = useQuery({ queryKey: ['voiceai', guildId], queryFn: () => api.get<Status>(`/guilds/${guildId}/voiceai`), refetchInterval: (q) => (q.state.data?.health.pull?.status === 'running' ? 2000 : 15_000) });
 
   useLive(['voiceai.session', 'voiceai.pull'], () => void refetch());
   useLive('voiceai.heard', (ev) => setLines((l) => [{ id: `h${ev.ts}`, kind: 'heard' as const, name: ev.data.name, text: ev.data.text, triggered: ev.data.triggered, at: ev.data.at }, ...l].slice(0, 60)));
+  useLive('voiceai.stage', (ev) => {
+    if (ev.data.stage === 'done') setStage(null);
+    else if (ev.data.stage === 'error') {
+      setStage(null);
+      setLines((l) => [{ id: `e${ev.ts}`, kind: 'error' as const, name: 'Fehler', text: ev.data.message ?? 'Unbekannter Fehler', at: ev.data.at }, ...l].slice(0, 60));
+    } else setStage({ stage: ev.data.stage, name: ev.data.name ?? '', at: ev.data.at });
+  });
   useLive('voiceai.turn', (ev) => {
+    setStage((st) => (st ? { ...st, stage: 'speaking' } : st));
     setLines((l) => [{ id: `t${ev.ts}`, kind: 'turn' as const, name: ev.data.name, text: ev.data.text, answer: ev.data.answer, ms: ev.data.llmMs, at: ev.data.at }, ...l].slice(0, 60));
     void qc.invalidateQueries({ queryKey: ['voiceai', guildId] });
   });
@@ -177,13 +186,19 @@ function LiveTab() {
       <div className="grid gap-4 xl:grid-cols-3">
         <Card className="xl:col-span-2">
           <CardHeader title="Live-Mitschrift" description="Was der Bot versteht und antwortet (nur in dieser Ansicht, nicht gespeichert)" icon={Ear} />
+          {stage && Date.now() - stage.at < 120_000 && (
+            <div className="mx-5 mt-4 flex items-center gap-3 rounded-xl border border-brand-500/30 bg-brand-500/[0.07] px-4 py-2.5 text-sm text-brand-300">
+              <CircleDashed className="h-4 w-4 animate-spin" />
+              {stage.stage === 'thinking' ? `Denkt über die Frage von ${stage.name} nach …` : 'Spricht …'}
+            </div>
+          )}
           {lines.length === 0 ? (
             <EmptyState icon={AudioLines} title="Noch nichts gehört" description={`Sprich im Sprachkanal: „${m.config?.botName ?? 'Rad'}, erzähl mir einen Witz.“`} />
           ) : (
             <div className="max-h-[480px] space-y-3 overflow-y-auto p-5">
               <AnimatePresence initial={false}>
                 {lines.map((l) => (
-                  <motion.div key={l.id} initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className={cn('rounded-xl border p-3', l.kind === 'turn' ? 'border-brand-500/25 bg-brand-500/[0.05]' : 'border-line/60 bg-white/[0.01]')}>
+                  <motion.div key={l.id} initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className={cn('rounded-xl border p-3', l.kind === 'turn' ? 'border-brand-500/25 bg-brand-500/[0.05]' : l.kind === 'error' ? 'border-red-500/30 bg-red-500/[0.06] text-red-200' : 'border-line/60 bg-white/[0.01]')}>
                     <div className="flex items-center gap-2 text-xs text-fg-subtle">
                       <MessageCircle className="h-3.5 w-3.5" /> <span className="font-medium text-fg-muted">{l.name}</span> · {relative(new Date(l.at))}
                       {l.kind === 'heard' && !l.triggered && <Badge>ignoriert</Badge>}
