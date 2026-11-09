@@ -19,6 +19,7 @@ import wave
 
 import numpy as np
 from fastapi import FastAPI, HTTPException, Request, Response
+from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -28,7 +29,7 @@ MODELS_DIR = os.environ.get("MODELS_DIR", "/models")
 WHISPER_MODEL = os.environ.get("WHISPER_MODEL", "small")
 WHISPER_DEVICE = os.environ.get("WHISPER_DEVICE", "cpu")
 WHISPER_COMPUTE = os.environ.get("WHISPER_COMPUTE", "int8")
-CPU_THREADS = int(os.environ.get("CPU_THREADS", "4"))
+CPU_THREADS = int(os.environ.get("CPU_THREADS", "6"))
 PIPER_BASE = "https://huggingface.co/rhasspy/piper-voices/resolve/main"
 
 # Deutsche Piper-Stimmen (Name → Pfad im offiziellen Piper-Stimmen-Repository)
@@ -106,22 +107,37 @@ def read_wav_16k_mono(data: bytes) -> np.ndarray:
     return audio
 
 
+_stt_lock = threading.Lock()
+
+
+def _transcribe(data: bytes, language: str) -> dict:
+    audio = read_wav_16k_mono(data)
+    t0 = time.time()
+    # Eine Erkennung gleichzeitig – mehrere parallel würden sich die CPU-Kerne nur gegenseitig wegnehmen
+    with _stt_lock:
+        segments, info = get_whisper().transcribe(
+            audio,
+            language=language or None,
+            beam_size=1,
+            best_of=1,
+            vad_filter=True,
+            vad_parameters={"min_silence_duration_ms": 300},
+            condition_on_previous_text=False,
+            without_timestamps=True,
+        )
+        text = " ".join(s.text.strip() for s in segments).strip()
+    ms = int((time.time() - t0) * 1000)
+    log.info("STT %.1fs Audio in %d ms: %s", len(audio) / 16000, ms, text[:80])
+    return {"text": text, "language": info.language, "seconds": round(len(audio) / 16000, 2), "ms": ms}
+
+
 @app.post("/stt")
 async def stt(request: Request, language: str = "de"):
     data = await request.body()
     if not data:
         raise HTTPException(400, "Leerer Audioinhalt")
-    audio = read_wav_16k_mono(data)
-    t0 = time.time()
-    segments, info = get_whisper().transcribe(
-        audio,
-        language=language or None,
-        beam_size=1,
-        vad_filter=True,
-        condition_on_previous_text=False,
-    )
-    text = " ".join(s.text.strip() for s in segments).strip()
-    return {"text": text, "language": info.language, "seconds": round(len(audio) / 16000, 2), "ms": int((time.time() - t0) * 1000)}
+    # Rechenintensive Erkennung in einem Thread – der Dienst bleibt währenddessen für /health und /tts erreichbar
+    return await run_in_threadpool(_transcribe, data, language)
 
 
 class TtsBody(BaseModel):
@@ -135,9 +151,11 @@ def tts(body: TtsBody):
     from piper import SynthesisConfig
 
     voice = get_voice(body.voice)
+    t0 = time.time()
     buf = io.BytesIO()
     with wave.open(buf, "wb") as wav_file:
         voice.synthesize_wav(body.text, wav_file, syn_config=SynthesisConfig(length_scale=body.length_scale))
+    log.info("TTS %d Zeichen in %d ms", len(body.text), int((time.time() - t0) * 1000))
     return Response(content=buf.getvalue(), media_type="audio/wav")
 
 

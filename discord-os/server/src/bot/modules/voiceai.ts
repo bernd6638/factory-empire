@@ -105,6 +105,70 @@ async function chat(cfg: Cfg, guildName: string, history: Turn[], userLine: stri
   return r.message?.content?.trim() ?? '';
 }
 
+/**
+ * Antwort als Stream: liefert fertige Sätze, sobald das Modell sie geschrieben hat.
+ * So kann der erste Satz schon gesprochen werden, während der Rest noch entsteht.
+ */
+export async function* chatSentences(cfg: Cfg, guildName: string, history: Turn[], userLine: string): AsyncGenerator<string> {
+  const system = renderTemplate(cfg.persona, { name: cfg.botName, server: guildName });
+  const res = await fetch(`${env().OLLAMA_URL}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: cfg.model,
+      stream: true,
+      keep_alive: '60m',
+      messages: [{ role: 'system', content: system }, ...history, { role: 'user', content: userLine }],
+      options: { temperature: cfg.temperature, num_predict: cfg.maxTokens },
+    }),
+    signal: AbortSignal.timeout(120_000),
+  });
+  if (!res.ok || !res.body) throw new Error(`Ollama antwortet mit ${res.status}: ${(await res.text().catch(() => '')).slice(0, 200)}`);
+  const reader = res.body.getReader();
+  const dec = new TextDecoder();
+  let lineBuf = '';
+  let text = '';
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    lineBuf += dec.decode(value, { stream: true });
+    const lines = lineBuf.split('\n');
+    lineBuf = lines.pop() ?? '';
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      const j = JSON.parse(line) as { message?: { content?: string }; error?: string };
+      if (j.error) throw new Error(j.error);
+      text += j.message?.content ?? '';
+      const { sentences, rest } = splitSentences(text);
+      text = rest;
+      for (const sentence of sentences) yield sentence;
+    }
+  }
+  if (text.trim()) yield text.trim();
+}
+
+/** Trennt fertige Sätze ab (mindestens ~20 Zeichen, damit sehr kurze Stücke nicht abgehackt klingen). */
+export function splitSentences(text: string): { sentences: string[]; rest: string } {
+  const sentences: string[] = [];
+  let rest = text;
+  for (;;) {
+    const m = rest.match(/^([\s\S]{20,}?[.!?…])(\s+)/);
+    if (!m) break;
+    sentences.push(m[1]!.trim());
+    rest = rest.slice(m[0].length);
+  }
+  return { sentences, rest };
+}
+
+/** Lädt das Modell vorab in die Grafikkarte, damit die erste Antwort nicht lange dauert. */
+async function warmup(cfg: Cfg) {
+  await fetch(`${env().OLLAMA_URL}/api/generate`, {
+    method: 'POST',
+    body: JSON.stringify({ model: cfg.model, prompt: '', keep_alive: '60m' }),
+    signal: AbortSignal.timeout(120_000),
+  }).catch((err) => log.debug({ err: err?.message }, 'Vorladen des Modells fehlgeschlagen'));
+}
+
 // ─── Sitzung ───
 
 function wakeWords(cfg: Cfg) {
@@ -112,7 +176,10 @@ function wakeWords(cfg: Cfg) {
 }
 
 async function speak(s: Session, text: string, cfg: Cfg) {
-  const wav = await synthesize(text, cfg.voice, cfg.speechRate);
+  await play(s, await synthesize(text, cfg.voice, cfg.speechRate));
+}
+
+async function play(s: Session, wav: Buffer) {
   const w = wavDecode(wav);
   const pcm = toDiscord(toMono(w.pcm, w.channels), w.sampleRate);
   const resource = createAudioResource(Readable.from([pcm]), { inputType: StreamType.Raw });
@@ -133,36 +200,55 @@ async function processQueue(ctx: BotContext, s: Session) {
       const t0 = Date.now();
       const stage = (stage: 'thinking' | 'speaking' | 'done' | 'error', message?: string) => ctx.live(s.guildId, 'voiceai.stage', { stage, message, userId: item.userId, name: item.name, at: Date.now() });
       stage('thinking');
-      log.info({ guild: s.guildId, model: cfg.model }, 'Sprach-Bot: frage Sprachmodell');
-      let answer: string;
+      const parts: string[] = [];
+      let firstMs = 0;
+      // Wiedergabe-Kette: jeder Satz wird sofort synthetisiert und der Reihe nach abgespielt
+      let chain: Promise<void> = Promise.resolve();
+      let ttsError: string | null = null;
+      const enqueue = (sentence: string) => {
+        const clean = cleanForSpeech(sentence);
+        if (!clean) return;
+        parts.push(clean);
+        const audio = synthesize(clean, cfg.voice, cfg.speechRate).catch((err) => {
+          ttsError = String(err?.message ?? err);
+          return null;
+        });
+        chain = chain.then(async () => {
+          const wav = await audio;
+          if (!wav) return;
+          if (parts.length === 1 || !firstMs) {
+            firstMs = firstMs || Date.now() - t0;
+            stage('speaking');
+          }
+          await play(s, wav).catch((err) => (ttsError = String(err?.message ?? err)));
+        });
+      };
       try {
-        answer = cleanForSpeech(await chat(cfg, guild.name, s.history, `${item.name}: ${item.text}`));
+        for await (const sentence of chatSentences(cfg, guild.name, s.history, `${item.name}: ${item.text}`)) enqueue(sentence);
       } catch (err: any) {
         const msg = String(err?.message ?? err);
         log.warn({ err: msg, model: cfg.model }, 'Sprachmodell-Anfrage fehlgeschlagen');
         stage('error', `Sprachmodell (${cfg.model}): ${msg}`);
-        answer = 'Mein Sprachmodell ist gerade nicht erreichbar.';
+        if (!parts.length) enqueue('Mein Sprachmodell ist gerade nicht erreichbar.');
       }
-      if (!answer) {
+      if (!parts.length) {
         stage('error', `Das Sprachmodell (${cfg.model}) hat eine leere Antwort geliefert.`);
         continue;
       }
+      const answer = parts.join(' ');
       const tLlm = Date.now() - t0;
       s.history.push({ role: 'user', content: `${item.name}: ${item.text}` }, { role: 'assistant', content: answer });
       if (s.history.length > cfg.historyTurns * 2) s.history.splice(0, s.history.length - cfg.historyTurns * 2);
       s.turns++;
       s.followUp.set(item.userId, Date.now());
-      // Antwort sofort anzeigen – auch falls die Sprachausgabe danach scheitert
-      ctx.live(s.guildId, 'voiceai.turn', { userId: item.userId, name: item.name, text: item.text, answer, llmMs: tLlm, at: Date.now() });
+      ctx.live(s.guildId, 'voiceai.turn', { userId: item.userId, name: item.name, text: item.text, answer, llmMs: tLlm, firstAudioMs: firstMs, at: Date.now() });
 
-      stage('speaking');
-      try {
-        await Promise.race([speak(s, answer, cfg), new Promise((_, rej) => setTimeout(() => rej(new Error('Zeitüberschreitung bei der Sprachausgabe')), 90_000))]);
-      } catch (err: any) {
-        const msg = String(err?.message ?? err);
-        log.warn({ err: msg, voice: cfg.voice }, 'Sprachausgabe fehlgeschlagen');
-        stage('error', `Sprachausgabe (${cfg.voice}): ${msg}`);
+      await Promise.race([chain, new Promise((r) => setTimeout(r, 120_000))]);
+      if (ttsError) {
+        log.warn({ err: ttsError, voice: cfg.voice }, 'Sprachausgabe fehlgeschlagen');
+        stage('error', `Sprachausgabe (${cfg.voice}): ${ttsError}`);
       }
+      log.info({ guild: s.guildId, firstAudioMs: firstMs, totalMs: Date.now() - t0 }, 'Sprach-Bot: Antwort gesprochen');
       s.followUp.set(item.userId, Date.now()); // Nachfrage-Fenster ab Ende der Antwort
       stage('done');
 
@@ -222,7 +308,7 @@ function listen(ctx: BotContext, s: Session) {
 
     s.capturing.add(userId);
     s.lastHuman = Date.now();
-    const opus = receiver.subscribe(userId, { end: { behavior: EndBehaviorType.AfterSilence, duration: 900 } });
+    const opus = receiver.subscribe(userId, { end: { behavior: EndBehaviorType.AfterSilence, duration: 700 } });
     const decoder = new prism.opus.Decoder({ rate: 48000, channels: 2, frameSize: 960 });
     const chunks: Buffer[] = [];
     let bytes = 0;
@@ -263,16 +349,30 @@ export async function joinTalk(ctx: BotContext, channel: VoiceBasedChannel): Pro
   connection.subscribe(player);
   const s: Session = { guildId: guild.id, channelId: channel.id, connection, player, history: [], capturing: new Set(), followUp: new Map(), queue: [], busy: false, lastHuman: Date.now(), turns: 0, startedAt: Date.now() };
   sessions.set(guild.id, s);
+  let reconnects = 0;
+  connection.on('stateChange', (oldS, newS) => {
+    if (oldS.status !== newS.status) log.info({ guild: guild.id, from: oldS.status, to: newS.status }, 'Sprachverbindung');
+    if (newS.status === VoiceConnectionStatus.Ready) reconnects = 0;
+  });
+  connection.on('error', (err) => log.warn({ err: err.message }, 'Fehler der Sprachverbindung'));
   connection.on(VoiceConnectionStatus.Disconnected, async () => {
     try {
+      // Kurze Unterbrechung (z. B. Kanalwechsel, Discord-Serverwechsel): Discord verbindet selbst neu
       await Promise.race([entersState(connection, VoiceConnectionStatus.Signalling, 5_000), entersState(connection, VoiceConnectionStatus.Connecting, 5_000)]);
     } catch {
-      leaveTalk(ctx, guild.id, 'Verbindung getrennt');
+      // Sonst bis zu 5-mal selbst neu verbinden, bevor aufgegeben wird
+      if (reconnects < 5 && sessions.get(guild.id)?.connection === connection) {
+        reconnects++;
+        log.warn({ guild: guild.id, attempt: reconnects }, 'Sprachverbindung getrennt – verbinde neu');
+        await new Promise((r) => setTimeout(r, reconnects * 2000));
+        connection.rejoin();
+      } else leaveTalk(ctx, guild.id, 'Verbindung getrennt');
     }
   });
   listen(ctx, s);
 
   const { config: cfg } = await ctx.config.get(guild.id, 'voiceai');
+  void warmup(cfg);
   if (cfg.announceJoin && channel.isTextBased()) {
     await channel
       .send({ embeds: [embed(COLORS.violet).setDescription(`🎙️ **${cfg.botName}** hört jetzt in diesem Sprachkanal zu.\nSprich mich mit „${cfg.botName}, …“ an. Audio wird nur zur Erkennung verarbeitet und **nicht gespeichert**.`)] })

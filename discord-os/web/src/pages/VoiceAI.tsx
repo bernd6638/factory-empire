@@ -88,7 +88,7 @@ function LiveTab() {
   });
   useLive('voiceai.turn', (ev) => {
     setStage((st) => (st ? { ...st, stage: 'speaking' } : st));
-    setLines((l) => [{ id: `t${ev.ts}`, kind: 'turn' as const, name: ev.data.name, text: ev.data.text, answer: ev.data.answer, ms: ev.data.llmMs, at: ev.data.at }, ...l].slice(0, 60));
+    setLines((l) => [{ id: `t${ev.ts}`, kind: 'turn' as const, name: ev.data.name, text: ev.data.text, answer: ev.data.answer, ms: ev.data.firstAudioMs || ev.data.llmMs, at: ev.data.at }, ...l].slice(0, 60));
     void qc.invalidateQueries({ queryKey: ['voiceai', guildId] });
   });
 
@@ -202,7 +202,7 @@ function LiveTab() {
                     <div className="flex items-center gap-2 text-xs text-fg-subtle">
                       <MessageCircle className="h-3.5 w-3.5" /> <span className="font-medium text-fg-muted">{l.name}</span> · {relative(new Date(l.at))}
                       {l.kind === 'heard' && !l.triggered && <Badge>ignoriert</Badge>}
-                      {l.ms !== undefined && <span className="ml-auto">{(l.ms / 1000).toFixed(1)} s Denkzeit</span>}
+                      {l.ms !== undefined && <span className="ml-auto">{(l.ms / 1000).toFixed(1)} s bis zur Antwort</span>}
                     </div>
                     <div className="mt-1 text-sm">{l.text}</div>
                     {l.answer && <div className="mt-2 flex gap-2 text-sm text-brand-300"><Bot className="mt-0.5 h-4 w-4 shrink-0" />{l.answer}</div>}

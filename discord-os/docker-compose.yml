@@ -59,7 +59,7 @@ services:
     restart: unless-stopped
     environment:
       WHISPER_MODEL: ${WHISPER_MODEL:-small}
-      CPU_THREADS: ${WHISPER_THREADS:-4}
+      CPU_THREADS: ${WHISPER_THREADS:-6}
       DEFAULT_VOICE: de_DE-thorsten-medium
     volumes:
       - voicemodels:/models
