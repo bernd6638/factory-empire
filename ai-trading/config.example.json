@@ -1,0 +1,28 @@
+{
+  "initial_capital": 100000,
+  "symbols": ["AAPL", "MSFT", "NVDA", "SPY", "QQQ"],
+  "data_provider": "auto",
+  "timeframe": "5m",
+  "confirm_timeframes": ["15m", "1h"],
+  "lookback_bars": 300,
+  "loop_interval_sec": 60,
+  "min_confidence": 0.55,
+  "llm_enabled": false,
+  "risk": {
+    "risk_per_trade": 0.01,
+    "max_position_pct": 0.20,
+    "max_gross_exposure": 1.0,
+    "max_open_positions": 5,
+    "daily_loss_limit": 0.03,
+    "max_drawdown_limit": 0.15,
+    "atr_stop_mult": 2.0,
+    "reward_risk": 2.0,
+    "allow_short": false
+  },
+  "costs": {
+    "commission_per_share": 0.005,
+    "commission_min": 1.0,
+    "commission_pct": 0.0,
+    "slippage_bps": 5.0
+  }
+}
