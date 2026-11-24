@@ -240,16 +240,22 @@ def circle(c, x, y, r, **kw):
     return c.create_oval(x - r, y - r, x + r, y + r, **kw)
 
 
-# --- Farben Controller (weißer Series-S-Controller) ---
-BODY = "#f1f1ef"
-BODY_EDGE = "#a9aaa8"
-BODY_SHADE = "#dcdcd9"
-PART = "#e6e6e3"          # Buttons / Sticks (weiß-grau)
-PART_EDGE = "#8f908e"
-DARK = "#2a2b2d"
+# --- Farben Controller (weißer Series-Controller "Robot White") ---
+BODY = "#f7f7f6"
+BODY_EDGE = "#b4b5b3"
+BODY_SHADOW = "#c9cac8"
+PART = "#fbfbfa"          # weiße Tasten / Bumper / Trigger
+WELL = "#e4e4e2"          # Mulde um die Sticks
+LABEL = "#55575a"
+DARK = "#1c1d1f"          # ABXY, D-Pad-Scheibe, Logo
+DPAD = "#3a3b3e"
+STICK = "#2a2b2e"
+STICK_EDGE = "#121314"
+STICK_TOP = "#38393c"
 GLOW = "#ffffff"
-ABXY = {"A": "#45b649", "B": "#e2343a", "X": "#2c78d6", "Y": "#f0b400"}
+ABXY = {"A": "#5cc443", "B": "#ef3b3b", "X": "#2f8cf0", "Y": "#ffc51a"}
 ACCENT = "#24a0ff"
+ACCENT_EDGE = "#0b6fc2"
 
 # --- Farben Tastatur ---
 KEY_FILL = "#202226"
@@ -261,7 +267,8 @@ KEY_ON_TEXT = "#ffffff"
 
 
 class ControllerView:
-    W, H = 360, 250
+    """Weißer Xbox-Series-Controller (Robot White) in Frontansicht."""
+    W, H = 370, 310
 
     def __init__(self, canvas, s):
         self.c, self.s = canvas, s
@@ -270,79 +277,88 @@ class ControllerView:
         self.build()
 
     def p(self, *vals):
-        return [v * self.s for v in vals]
+        # alle Koordinaten um 3 px nach rechts versetzt, damit der Körper nicht anstößt
+        return [(v + (3 if i % 2 == 0 else 0)) * self.s for i, v in enumerate(vals)]
+
+    def w(self, v):
+        return max(1, v * self.s)
 
     def build(self):
-        c, s = self.c, self.s
-        P = self.p
+        c, s, P, W = self.c, self.s, self.p, self.w
 
-        # Trigger
-        for name, x1, x2 in (("lt", 78, 132), ("rt", 228, 282)):
-            rrect(c, *P(x1, 4, x2, 25), 8 * s, fill=PART, outline=PART_EDGE, width=max(1, s * 1.2))
-            fill = c.create_rectangle(*P(x1 + 3, 22, x2 - 3, 22), fill=ACCENT, width=0)
-            c.create_text(*P((x1 + x2) / 2, 14.5), text=name.upper(), fill=DARK,
+        # Trigger (hinten, schauen oben raus)
+        for name, x1, x2 in (("lt", 62, 126), ("rt", 238, 302)):
+            rrect(c, *P(x1, 8, x2, 46), 12 * s, fill=PART, outline=BODY_EDGE, width=W(1.3))
+            fill = c.create_rectangle(*P(x1 + 4, 31, x2 - 4, 31), fill=ACCENT, width=0)
+            c.create_text(*P((x1 + x2) / 2, 19), text=name.upper(), fill=LABEL,
                           font=("Segoe UI", int(-9 * s), "bold"))
-            self.items[name] = (fill, x1 + 3, x2 - 3)
+            self.items[name] = (fill, x1 + 4, x2 - 4)
 
         # Bumper
-        for name, x1, x2 in (("lb", 56, 144), ("rb", 216, 304)):
-            item = rrect(c, *P(x1, 28, x2, 44), 8 * s, fill=PART, outline=PART_EDGE,
-                         width=max(1, s * 1.2))
-            txt = c.create_text(*P((x1 + x2) / 2, 36), text=name.upper(), fill=DARK,
+        for name, x1, x2 in (("lb", 38, 138), ("rb", 226, 326)):
+            item = rrect(c, *P(x1, 34, x2, 62), 13 * s, fill=PART, outline=BODY_EDGE, width=W(1.3))
+            txt = c.create_text(*P((x1 + x2) / 2, 38), text=name.upper(), fill=LABEL,
                                 font=("Segoe UI", int(-9 * s), "bold"))
             self.items[name] = (item, txt)
 
-        # Körper
-        body = [100, 50, 140, 44, 180, 47, 220, 44, 260, 50, 300, 58, 326, 88, 344, 148, 358, 204,
-                352, 238, 326, 248, 300, 236, 274, 204, 244, 180, 180, 174, 116, 180, 86, 204, 60, 236,
-                34, 248, 8, 238, 2, 204, 16, 148, 34, 88, 60, 58]
-        c.create_polygon(*P(*[v + (1.5 if i % 2 else 0) for i, v in enumerate(body)]),
-                         smooth=True, fill=BODY_SHADE, outline="")
-        c.create_polygon(*P(*body), smooth=True, fill=BODY, outline=BODY_EDGE, width=max(1, s * 1.5))
+        # Körper (mit leichtem Schatten)
+        body = [104, 50, 182, 48, 260, 50, 302, 53, 329, 63, 348, 100, 358, 158, 364, 214, 361, 258,
+                352, 286, 338, 300, 320, 302, 304, 290, 270, 244, 238, 214, 182, 206, 126, 214, 94, 244,
+                60, 290, 44, 302, 26, 300, 12, 286, 3, 258, 0, 214, 6, 158, 16, 100, 35, 63, 62, 53]
+        c.create_polygon(*P(*[v + (2.5 if i % 2 else 1) for i, v in enumerate(body)]),
+                         smooth=True, fill=BODY_SHADOW, outline="")
+        c.create_polygon(*P(*body), smooth=True, fill=BODY, outline=BODY_EDGE, width=W(1.4))
 
-        # Xbox-Button
-        g = circle(c, *P(180, 80), 13 * s, fill=PART, outline=PART_EDGE, width=max(1, s))
-        gx = c.create_text(*P(180, 80), text="X", fill=DARK, font=("Segoe UI", int(-12 * s), "bold"))
-        self.items["guide"] = (g, gx)
+        # Xbox-Button (Logo)
+        gx, gy = 182, 82
+        ring = circle(c, *P(gx, gy), 15 * s, fill=BODY, outline=BODY, width=W(2))
+        logo = circle(c, *P(gx, gy), 11.5 * s, fill=DARK, outline="")
+        for a in (45, 135):
+            r = math.radians(a)
+            dx, dy = math.cos(r) * 8.5, math.sin(r) * 8.5
+            c.create_line(*P(gx - dx, gy - dy, gx + dx, gy + dy), fill=BODY, width=W(2.6))
+        self.items["guide"] = (ring, logo)
 
-        # View / Menu / Share
-        self.items["view"] = (circle(c, *P(152, 112), 6.5 * s, fill=PART, outline=PART_EDGE, width=max(1, s)),)
-        self.items["menu"] = (circle(c, *P(208, 112), 6.5 * s, fill=PART, outline=PART_EDGE, width=max(1, s)),)
-        circle(c, *P(180, 129), 4 * s, fill=PART, outline=PART_EDGE, width=max(1, s))
-        c.create_line(*P(149, 110.5, 155, 110.5), fill=DARK, width=max(1, s))
-        c.create_line(*P(149, 113.5, 155, 113.5), fill=DARK, width=max(1, s))
-        for dy in (-2.2, 0, 2.2):
-            c.create_line(*P(205, 112 + dy, 211, 112 + dy), fill=DARK, width=max(1, s * 0.8))
+        # View / Menu / Share (kleine weiße Tasten)
+        for name, x in (("view", 155), ("menu", 209)):
+            o = circle(c, *P(x, 116), 8 * s, fill=PART, outline=BODY_EDGE, width=W(1.2))
+            self.items[name] = (o,)
+        # View-Symbol (zwei Fenster)
+        c.create_rectangle(*P(151.5, 112.5, 156, 117), outline=LABEL, width=W(0.9))
+        c.create_rectangle(*P(154, 115, 158.5, 119.5), outline=LABEL, fill=PART, width=W(0.9))
+        for dy in (-2.4, 0, 2.4):
+            c.create_line(*P(205.5, 116 + dy, 212.5, 116 + dy), fill=LABEL, width=W(0.9))
+        rrect(c, *P(174, 131, 190, 141), 5 * s, fill=PART, outline=BODY_EDGE, width=W(1.2))
+        c.create_line(*P(178.5, 137.5, 185.5, 137.5), fill=LABEL, width=W(0.9))
 
-        # Sticks
-        for name, cx, cy in (("ls", 98, 112), ("rs", 222, 166)):
-            circle(c, *P(cx, cy), 22 * s, fill=BODY_SHADE, outline=PART_EDGE, width=max(1, s * 1.2))
-            thumb = circle(c, *P(cx, cy), 14 * s, fill=PART, outline=PART_EDGE, width=max(1, s * 1.5))
-            dot = circle(c, *P(cx, cy), 3 * s, fill=PART_EDGE, outline="")
-            self.items[name] = (thumb, dot, cx, cy)
+        # Sticks: weißer Ring + schwarzer Daumen
+        for name, cx, cy in (("ls", 89, 115), ("rs", 228, 172)):
+            circle(c, *P(cx, cy), 26 * s, fill=BODY, outline=BODY_EDGE, width=W(1.3))
+            circle(c, *P(cx, cy), 23 * s, fill=WELL, outline="")
+            thumb = circle(c, *P(cx, cy), 19 * s, fill=STICK, outline=STICK_EDGE, width=W(1.5))
+            cap = circle(c, *P(cx, cy), 13 * s, fill=STICK_TOP, outline="")
+            self.items[name] = (thumb, cap, cx, cy)
 
-        # D-Pad
-        cx, cy = 138, 166
-        circle(c, *P(cx, cy), 20 * s, fill=BODY_SHADE, outline="")
+        # D-Pad: schwarze Scheibe mit Kreuz
+        cx, cy = 134, 173
+        circle(c, *P(cx, cy), 27 * s, fill=DARK, outline=STICK_EDGE, width=W(1.3))
         arms = {
-            "up": (cx - 6, cy - 17, cx + 6, cy - 5),
-            "down": (cx - 6, cy + 5, cx + 6, cy + 17),
-            "left": (cx - 17, cy - 6, cx - 5, cy + 6),
-            "right": (cx + 5, cy - 6, cx + 17, cy + 6),
+            "up": (cx - 7.5, cy - 22, cx + 7.5, cy - 7),
+            "down": (cx - 7.5, cy + 7, cx + 7.5, cy + 22),
+            "left": (cx - 22, cy - 7.5, cx - 7, cy + 7.5),
+            "right": (cx + 7, cy - 7.5, cx + 22, cy + 7.5),
         }
-        c.create_rectangle(*P(cx - 6, cy - 6, cx + 6, cy + 6), fill=PART, outline=PART_EDGE,
-                           width=max(1, s))
+        c.create_rectangle(*P(cx - 7.5, cy - 7.5, cx + 7.5, cy + 7.5), fill=DPAD, outline="")
         for name, box in arms.items():
-            self.items["d" + name] = (rrect(c, *P(*box), 3 * s, fill=PART, outline=PART_EDGE,
-                                            width=max(1, s)),)
+            self.items["d" + name] = (rrect(c, *P(*box), 3 * s, fill=DPAD, outline=""),)
+        circle(c, *P(cx, cy), 3.5 * s, fill=STICK_TOP, outline="")
 
-        # ABXY
-        bx, by, d = 262, 112, 20
+        # ABXY: schwarz mit farbigen Buchstaben
+        bx, by, d = 262, 116, 23
         for name, ox, oy in (("Y", 0, -d), ("X", -d, 0), ("B", d, 0), ("A", 0, d)):
-            o = circle(c, *P(bx + ox, by + oy), 10.5 * s, fill=PART, outline=PART_EDGE,
-                       width=max(1, s * 1.2))
+            o = circle(c, *P(bx + ox, by + oy), 11.5 * s, fill=DARK, outline=STICK_EDGE, width=W(1.2))
             t = c.create_text(*P(bx + ox, by + oy), text=name, fill=ABXY[name],
-                              font=("Segoe UI", int(-11 * s), "bold"))
+                              font=("Segoe UI", int(-12 * s), "bold"))
             self.items[name] = (o, t)
 
     def update(self, st):
@@ -351,42 +367,40 @@ class ControllerView:
             return
         self._last = k
         st = st or PadState()
-        c, s = self.c, self.s
+        c, W = self.c, self.w
         b = st.buttons
-
-        def simple(name, on):
-            c.itemconfigure(self.items[name][0], fill=ACCENT if on else PART,
-                            outline=DARK if on else PART_EDGE)
 
         for name, val in (("lt", st.lt), ("rt", st.rt)):
             item, x1, x2 = self.items[name]
-            top = 22 - 15 * val
-            c.coords(item, *self.p(x1, top, x2, 22))
+            c.coords(item, *self.p(x1, 31 - 19 * val, x2, 31))
         for name, bit in (("lb", BTN_LB), ("rb", BTN_RB)):
             on = bool(b & bit)
-            simple(name, on)
-            c.itemconfigure(self.items[name][1], fill=GLOW if on else DARK)
-        g, gx = self.items["guide"]
+            c.itemconfigure(self.items[name][0], fill=ACCENT if on else PART,
+                            outline=ACCENT_EDGE if on else BODY_EDGE)
+            c.itemconfigure(self.items[name][1], fill=GLOW if on else LABEL)
+        ring, logo = self.items["guide"]
         on = bool(b & BTN_GUIDE)
-        c.itemconfigure(g, fill=GLOW if on else PART, outline=ACCENT if on else PART_EDGE,
-                        width=max(1, s * (3 if on else 1)))
-        simple("view", b & BTN_VIEW)
-        simple("menu", b & BTN_MENU)
+        c.itemconfigure(ring, outline=ACCENT if on else BODY, width=W(3 if on else 2))
+        c.itemconfigure(logo, fill=ACCENT if on else DARK)
+        for name, bit in (("view", BTN_VIEW), ("menu", BTN_MENU)):
+            on = bool(b & bit)
+            c.itemconfigure(self.items[name][0], fill=ACCENT if on else PART,
+                            outline=ACCENT_EDGE if on else BODY_EDGE)
         for name, bit in (("dup", DPAD_UP), ("ddown", DPAD_DOWN), ("dleft", DPAD_LEFT), ("dright", DPAD_RIGHT)):
-            simple(name, b & bit)
+            c.itemconfigure(self.items[name][0], fill=ACCENT if b & bit else DPAD)
         for name, bit in (("A", BTN_A), ("B", BTN_B), ("X", BTN_X), ("Y", BTN_Y)):
             o, t = self.items[name]
             on = bool(b & bit)
-            c.itemconfigure(o, fill=ABXY[name] if on else PART, outline=DARK if on else PART_EDGE)
+            c.itemconfigure(o, fill=ABXY[name] if on else DARK)
             c.itemconfigure(t, fill=GLOW if on else ABXY[name])
         for name, x, y, bit in (("ls", st.lx, st.ly, BTN_LS), ("rs", st.rx, st.ry, BTN_RS)):
-            thumb, dot, cx, cy = self.items[name]
-            tx, ty = cx + x * 9, cy - y * 9
-            c.coords(thumb, *self.p(tx - 14, ty - 14, tx + 14, ty + 14))
-            c.coords(dot, *self.p(tx - 3, ty - 3, tx + 3, ty + 3))
+            thumb, cap, cx, cy = self.items[name]
+            tx, ty = cx + x * 7, cy - y * 7
+            c.coords(thumb, *self.p(tx - 19, ty - 19, tx + 19, ty + 19))
+            c.coords(cap, *self.p(tx - 13, ty - 13, tx + 13, ty + 13))
             on = bool(b & bit)
-            c.itemconfigure(thumb, fill=ACCENT if on else PART, outline=DARK if on else PART_EDGE)
-            c.itemconfigure(dot, fill=GLOW if on else PART_EDGE)
+            c.itemconfigure(thumb, outline=ACCENT if on else STICK_EDGE, width=W(3 if on else 1.5))
+            c.itemconfigure(cap, fill=ACCENT if on else STICK_TOP)
 
 
 class KeyboardView:
