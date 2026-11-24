@@ -1,0 +1,43 @@
+# Baut das Input Overlay (input-overlay/) als eigenständige Windows-.exe und stellt sie als
+# Release "input-overlay" bereit. Wird NICHT als "latest" markiert, damit der Download-Link
+# der Factory-Empire-Installer unverändert bleibt.
+name: Input Overlay EXE bauen
+
+on:
+  push:
+    paths: [input-overlay/**, .github/workflows/input-overlay.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: EXE bauen
+        working-directory: input-overlay
+        run: |
+          python -m pip install --upgrade pyinstaller
+          python -m PyInstaller --onefile --noconsole --name InputOverlay input_overlay.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: InputOverlay
+          path: input-overlay/dist/InputOverlay.exe
+      - name: Als Release veröffentlichen
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view input-overlay >/dev/null 2>&1; then
+            gh release upload input-overlay input-overlay/dist/InputOverlay.exe --clobber
+          else
+            gh release create input-overlay input-overlay/dist/InputOverlay.exe \
+              --target "$GITHUB_SHA" --latest=false \
+              --title "Input Overlay" \
+              --notes "Overlay für Xbox-Controller und Tastatur. InputOverlay.exe herunterladen und doppelklicken – kein Python nötig."
+          fi
