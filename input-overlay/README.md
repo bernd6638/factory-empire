@@ -28,9 +28,21 @@ Die Tastenkürzel funktionieren auch, während das Spiel im Vordergrund ist.
 Im Modus **Automatisch** wechselt das Overlay von selbst, je nachdem ob du gerade Controller oder Tastatur benutzt.
 Einstellungen (Position, Größe, Modus) werden automatisch gespeichert.
 
+## In OBS einfügen
+
+Solange das Programm läuft, stellt es das Overlay auch als Seite für OBS bereit – mit echtem durchsichtigem Hintergrund.
+
+1. Im Einstellungsfenster unter **„OBS (Browserquelle)“** auf **Link kopieren** klicken:
+   - **Wie Overlay** – zeigt das an, was auch das Overlay gerade zeigt (folgt auch dem Automatisch-Modus)
+   - **Controller** / **Tastatur** – zeigt immer nur das eine
+2. In OBS: **Quellen → + → Browser** → bei **URL** den Link einfügen (z. B. `http://localhost:8765/`).
+3. **Breite 800**, **Höhe 650** eintragen → OK. Danach in OBS einfach größer/kleiner ziehen und platzieren.
+
+Das funktioniert auch, wenn das Overlay auf dem Bildschirm ausgeblendet ist (Strg+Alt+O) – so siehst nur dein Stream die Eingaben.
+Wenn OBS vor dem Programm gestartet wird, verbindet sich die Quelle von selbst, sobald das Programm läuft.
+
 ## Hinweise
 
 - Der Controller kann per USB, Bluetooth oder Xbox-Wireless-Adapter verbunden sein.
 - Damit das Overlay über dem Spiel sichtbar ist, im Spiel **„Randloses Fenster“ / „Borderless“** statt echtem Vollbild einstellen.
-- Zum Aufnehmen mit OBS: Overlay-Fenster als Fensteraufnahme hinzufügen oder einfach die Bildschirmaufnahme nutzen.
 - Der Share-Button wird von Windows nicht an Programme weitergegeben und leuchtet deshalb nicht auf.

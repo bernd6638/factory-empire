@@ -8,12 +8,16 @@ Test ohne Windows:  python input_overlay.py --demo
 """
 
 import json
+import threading
 import math
 import os
 import sys
 import time
 import tkinter as tk
 from tkinter import ttk
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+from obs_page import PAGE as OBS_PAGE
 
 IS_WINDOWS = sys.platform == "win32"
 DEMO = "--demo" in sys.argv
@@ -223,6 +227,22 @@ KEY_ROWS = [
     [(("vk", VK_LCONTROL, "Strg"), 1.5), (("vk", VK_LWIN, "Win"), 1.25),
      (("vk", VK_LMENU, "Alt"), 1.25), (("vk", VK_SPACE, "Leertaste"), 3.75)],
 ]
+def resolve_layout(inp):
+    """KEY_ROWS -> [[(vk, label, breite), ...], ...] passend zum Tastaturlayout des PCs."""
+    rows = []
+    for row in KEY_ROWS:
+        out = []
+        for spec, width in row:
+            if isinstance(spec, tuple):
+                _, vk, label = spec
+            else:
+                vk = inp.vk_from_scancode(spec) or SCAN_FALLBACK_VK.get(spec, 0)
+                label = inp.char_for_vk(vk) or "?"
+            out.append((vk, label, width))
+        rows.append(out)
+    return rows
+
+
 MOUSE_BUTTONS = {"lmb": 0x01, "rmb": 0x02, "mmb": 0x04, "x1": 0x05, "x2": 0x06}
 
 
@@ -407,8 +427,8 @@ class KeyboardView:
     U = 36      # Tasteneinheit
     GAP = 4
 
-    def __init__(self, canvas, s, inp):
-        self.c, self.s, self.inp = canvas, s, inp
+    def __init__(self, canvas, s, rows):
+        self.c, self.s, self.rows = canvas, s, rows
         self.keys = []   # (vk, rect, text)
         self.mouse = {}
         self._last = None
@@ -421,14 +441,9 @@ class KeyboardView:
         pad = 4
         y = pad
         maxx = 0
-        for row in KEY_ROWS:
+        for row in self.rows:
             x = pad
-            for spec, width in row:
-                if isinstance(spec, tuple):
-                    _, vk, label = spec
-                else:
-                    vk = self.inp.vk_from_scancode(spec) or SCAN_FALLBACK_VK.get(spec, 0)
-                    label = self.inp.char_for_vk(vk) or "?"
+            for vk, label, width in row:
                 w = width * U - G
                 r = rrect(c, x * s, y * s, (x + w) * s, (y + U - G) * s, 7 * s,
                           fill=KEY_FILL, outline=KEY_EDGE, width=max(1, s * 1.2))
@@ -479,8 +494,71 @@ class KeyboardView:
             base = "#3a3d44" if name == "mmb" else KEY_FILL
             c.itemconfigure(item, fill=KEY_ON_FILL if on else base, outline=KEY_ON_EDGE if on else KEY_EDGE)
 
-    def watched_vks(self):
-        return [vk for vk, _, _ in self.keys] + list(MOUSE_BUTTONS.values())
+
+# --------------------------------------------------------------------------
+# OBS: kleiner lokaler Webserver für die Browserquelle
+# --------------------------------------------------------------------------
+OBS_PORTS = range(8765, 8776)
+
+
+def start_obs_server(app):
+    class Handler(BaseHTTPRequestHandler):
+        def log_message(self, *a):
+            pass
+
+        def _send(self, body, ctype):
+            data = body.encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", ctype)
+            self.send_header("Cache-Control", "no-cache")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+
+        def do_GET(self):
+            path = self.path.split("?")[0]
+            if path in ("/", "/index.html"):
+                self._send(OBS_PAGE, "text/html; charset=utf-8")
+            elif path == "/layout":
+                rows = [[{"vk": vk, "label": label, "w": w} for vk, label, w in row] for row in app.kb_rows]
+                self._send(json.dumps({"rows": rows}), "application/json")
+            elif path == "/state":
+                self._send(app.obs_state, "application/json")
+            elif path == "/events":
+                self._events()
+            else:
+                self.send_error(404)
+
+        def _events(self):
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream")
+            self.send_header("Cache-Control", "no-cache")
+            self.end_headers()
+            last, last_ping = -1, time.monotonic()
+            try:
+                while True:
+                    v = app.obs_version
+                    if v != last:
+                        last = v
+                        self.wfile.write(f"data: {app.obs_state}\n\n".encode("utf-8"))
+                        self.wfile.flush()
+                    elif time.monotonic() - last_ping > 10:
+                        self.wfile.write(b": ping\n\n")
+                        self.wfile.flush()
+                        last_ping = time.monotonic()
+                    time.sleep(0.008)
+            except Exception:
+                return
+
+    for port in OBS_PORTS:
+        try:
+            srv = ThreadingHTTPServer(("127.0.0.1", port), Handler)
+        except OSError:
+            continue
+        srv.daemon_threads = True
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        return port
+    return None
 
 
 # --------------------------------------------------------------------------
@@ -496,6 +574,11 @@ class App:
                 pass
         self.inp = WinInput() if (IS_WINDOWS and not DEMO) else DemoInput()
         self.cfg = load_settings()
+        self.kb_rows = resolve_layout(self.inp)
+        self.kb_vks = [vk for row in self.kb_rows for vk, _, _ in row] + list(MOUSE_BUTTONS.values())
+        self.obs_state = "{}"
+        self.obs_version = 0
+        self.obs_port = start_obs_server(self)
         self.shown_mode = "controller" if self.cfg["mode"] != "keyboard" else "keyboard"
         self.view = None
         self._hk_prev = {}
@@ -582,6 +665,19 @@ class App:
         self.lbl_opacity.pack(side="left", padx=(8, 0))
 
         ttk.Button(of, text="Position zurücksetzen", command=self.reset_position).pack(anchor="w", pady=(8, 0))
+
+        obs = ttk.LabelFrame(f, text="OBS (Browserquelle)", padding=8)
+        obs.pack(fill="x", pady=(10, 0))
+        self.var_obs = tk.StringVar(value=self.obs_url() if self.obs_port else "–")
+        ttk.Entry(obs, textvariable=self.var_obs, state="readonly").pack(fill="x")
+        row = ttk.Frame(obs)
+        row.pack(fill="x", pady=(6, 0))
+        ttk.Label(row, text="Link kopieren:").pack(side="left")
+        ttk.Button(row, text="Wie Overlay", command=lambda: self.copy_obs_url()).pack(side="left", padx=(6, 0))
+        ttk.Button(row, text="Controller", command=lambda: self.copy_obs_url("controller")).pack(side="left", padx=(4, 0))
+        ttk.Button(row, text="Tastatur", command=lambda: self.copy_obs_url("keyboard")).pack(side="left", padx=(4, 0))
+        self.lbl_obs = ttk.Label(obs, text=self._obs_hint(), foreground="#444")
+        self.lbl_obs.pack(anchor="w", pady=(6, 0))
 
         self.lbl_status = ttk.Label(f, text="", foreground="#666")
         self.lbl_status.pack(anchor="w", pady=(10, 0))
@@ -697,7 +793,7 @@ class App:
             self.view = ControllerView(self.canvas, s)
             w, h = ControllerView.W * s, ControllerView.H * s
         else:
-            self.view = KeyboardView(self.canvas, s, self.inp)
+            self.view = KeyboardView(self.canvas, s, self.kb_rows)
             w, h = self.view.W * s, self.view.H * s
         self.canvas.configure(width=int(w) + 2, height=int(h) + 2)
         self._size = (int(w) + 2, int(h) + 2)
@@ -773,12 +869,7 @@ class App:
         try:
             self._poll_hotkeys()
             pad = self.inp.pad()
-            down = set()
-            need_keys = self.shown_mode == "keyboard" or self.cfg["mode"] == "auto"
-            if need_keys:
-                vks = (self.view.watched_vks() if isinstance(self.view, KeyboardView)
-                       else [0x57, 0x41, 0x53, 0x44, VK_SPACE, VK_LSHIFT, 0x01, 0x02])
-                down = {vk for vk in vks if self.inp.key_down(vk)}
+            down = {vk for vk in self.kb_vks if self.inp.key_down(vk)}
 
             if self.cfg["mode"] == "auto":
                 want = None
@@ -789,6 +880,8 @@ class App:
                 if want and want != self.shown_mode:
                     self.shown_mode = want
                     self.rebuild()
+
+            self._publish(pad, down)
 
             if self.cfg["visible"]:
                 if isinstance(self.view, ControllerView):
@@ -809,6 +902,33 @@ class App:
         except tk.TclError:
             return
         self.root.after(16, self.tick)
+
+    def _publish(self, pad, down):
+        st = pad or PadState()
+        data = {"m": self.shown_mode, "c": pad is not None, "b": st.buttons,
+                "lt": round(st.lt, 3), "rt": round(st.rt, 3), "lx": round(st.lx, 3), "ly": round(st.ly, 3),
+                "rx": round(st.rx, 3), "ry": round(st.ry, 3), "k": sorted(down)}
+        text = json.dumps(data, separators=(",", ":"))
+        if text != self.obs_state:
+            self.obs_state = text
+            self.obs_version += 1
+
+    def obs_url(self, mode=None):
+        url = f"http://localhost:{self.obs_port}/"
+        return url + (f"?mode={mode}" if mode else "")
+
+    def copy_obs_url(self, mode=None):
+        if not self.obs_port:
+            return
+        self.root.clipboard_clear()
+        self.root.clipboard_append(self.obs_url(mode))
+        self.lbl_obs.configure(text="Link kopiert! In OBS: Quelle + → Browser → URL einfügen.")
+        self.root.after(4000, lambda: self.lbl_obs.configure(text=self._obs_hint()))
+
+    def _obs_hint(self):
+        if not self.obs_port:
+            return "OBS-Server konnte nicht gestartet werden."
+        return "Breite 800 × Höhe 650 einstellen. Größe dann in OBS ziehen."
 
     def run(self):
         self.root.mainloop()
