@@ -1,11 +1,19 @@
 {
- "version": "2.18.0",
+ "version": "2.19.0",
  "runtime": 1,
- "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.18.0.zip",
- "sha256": "e23e1c774e2239fb275e0573de49d88ae631e14ce810381d5c21d80d107e18f2",
- "size": 8638122,
+ "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.19.0.zip",
+ "sha256": "bc0592881fb427932b6360aa3149d37ed3382ab54c9f87c551c91bea57e3e5de",
+ "size": 8644763,
  "download_page": "https://github.com/bernd6638/factory-empire",
  "notes": [
+  [
+   "2.19.0",
+   [
+    "Neue Bildverbesserung (Optionen » Leistung): weiche Kanten, Kontaktschatten an Gebäuden, leuchtende Lichter und ein filmischer Farblook",
+    "Natürlicherer Rasen mit trockenen Stellen und Kleefeldern statt einheitlichem Grün",
+    "Nachts strahlen Lampen, Funken und Glanzlichter jetzt richtig in die Umgebung"
+   ]
+  ],
   [
    "2.18.0",
    [
@@ -71,13 +79,6 @@
    "2.15.2",
    [
     "Kleine Verbesserungen und Fehlerbehebungen"
-   ]
-  ],
-  [
-   "2.15.1",
-   [
-    "Karte: Der weiße Rahmen ist weg – der orange Pfeil zeigt deine Position und Blickrichtung",
-    "Neue Updates erscheinen im Spiel jetzt schon nach etwa einer Minute oben rechts (vorher konnte es bis zu 7 Minuten dauern)"
    ]
   ]
  ]
