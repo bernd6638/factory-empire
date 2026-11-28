@@ -22,7 +22,9 @@ TIKTOK_URL = "https://www.tiktok.com/@factory.empire1"
 DISCORD_INVITE = "https://discord.gg/xkZR7aGJG"
 
 
-EMOJIS = [("musik", "🎵"), ("vogel", "🐦"), ("wind", "🌬️"), ("geräusch", "🔊"), ("sound", "🔊"),
+# Reihenfolge zählt: der erste Treffer gewinnt (spezielle Begriffe vor kurzen wie "chat" in "Kontaktschatten")
+EMOJIS = [("bildverbesserung", "🎨"), ("rasen", "🌱"), ("nachts", "🌙"), ("produkt", "📦"), ("forschung", "🔬"),
+          ("musik", "🎵"), ("vogel", "🐦"), ("wind", "🌬️"), ("geräusch", "🔊"), ("sound", "🔊"),
           ("regler", "🎚️"), ("einstell", "🎚️"), ("förderband", "⚙️"), ("kurve", "⚙️"), ("chat", "💬"), ("grafik", "🎨"), ("beleucht", "🎨"),
           ("baustelle", "🚧"), ("countdown", "⏳"), ("auftr", "🚚"), ("lkw", "🚚"), ("discord", "🎮"),
           ("update", "🔄"), ("statistik", "📊"), ("erfolg", "🏆"), ("wald", "🌲"), ("fps", "⚡"),
