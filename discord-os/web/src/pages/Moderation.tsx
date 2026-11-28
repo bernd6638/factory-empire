@@ -259,6 +259,35 @@ function AutomodTab() {
           <ActionEditor value={c.invites.action} onChange={(v) => m.update((d) => void (d.invites.action = v))} />
         </RuleCard>
 
+        <RuleCard icon={Ban} title="Gesperrte Websites" description="Löscht Links zu bestimmten Seiten wie TikTok oder YouTube – andere Links bleiben erlaubt" enabled={c.blockedLinks.enabled} onToggle={(v) => m.update((d) => void (d.blockedLinks.enabled = v))}>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { label: 'TikTok', domains: ['tiktok.com'] },
+              { label: 'YouTube', domains: ['youtube.com', 'youtu.be'] },
+              { label: 'Instagram', domains: ['instagram.com'] },
+              { label: 'Twitch', domains: ['twitch.tv'] },
+              { label: 'X / Twitter', domains: ['x.com', 'twitter.com'] },
+              { label: 'Snapchat', domains: ['snapchat.com'] },
+            ].map((p) => {
+              const active = p.domains.every((d) => c.blockedLinks.domains.includes(d));
+              return (
+                <button
+                  key={p.label}
+                  type="button"
+                  onClick={() => m.update((d) => void (d.blockedLinks.domains = active ? d.blockedLinks.domains.filter((x) => !p.domains.includes(x)) : [...new Set([...d.blockedLinks.domains, ...p.domains])]))}
+                  className={`rounded-lg border px-3 py-1.5 text-sm transition ${active ? 'border-red-500/40 bg-red-500/10 text-red-200' : 'border-line text-fg-muted hover:text-fg'}`}
+                >
+                  {active ? '✕ ' : '+ '}{p.label}
+                </button>
+              );
+            })}
+          </div>
+          <Field label="Gesperrte Domains" hint="Subdomains werden automatisch mit gesperrt (tiktok.com → vm.tiktok.com, youtube.com → m.youtube.com). Moderatoren sind ausgenommen.">
+            <TagInput value={c.blockedLinks.domains} onChange={(v) => m.update((d) => void (d.blockedLinks.domains = v.map((x) => x.toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, ''))))} placeholder="z. B. tiktok.com" />
+          </Field>
+          <ActionEditor value={c.blockedLinks.action} onChange={(v) => m.update((d) => void (d.blockedLinks.action = v))} />
+        </RuleCard>
+
         <RuleCard icon={Link2} title="Anti-Link" description="Erlaubt nur Links zu freigegebenen Domains" enabled={c.links.enabled} onToggle={(v) => m.update((d) => void (d.links.enabled = v))}>
           <Field label="Erlaubte Domains" hint="Subdomains sind automatisch erlaubt (youtube.com → music.youtube.com)">
             <TagInput value={c.links.allowedDomains} onChange={(v) => m.update((d) => void (d.links.allowedDomains = v))} placeholder="z. B. youtube.com" />

@@ -4,7 +4,7 @@
 
 const INVITE_RE = /(?:https?:\/\/)?(?:www\.)?(?:discord(?:app)?\.com\/invite|discord\.gg|dsc\.gg|discord\.me)\/([a-z0-9-]{2,32})/gi;
 const URL_RE = /\bhttps?:\/\/([^\s/$.?#][^\s/]*)[^\s]*/gi;
-const BARE_DOMAIN_RE = /\b((?:[a-z0-9-]+\.)+(?:com|net|org|de|io|gg|ru|xyz|me|tv|co|info|biz|app|dev|link|ly|to|sh|cc|eu|uk|fr|nl|at|ch))\b(?:\/\S*)?/gi;
+const BARE_DOMAIN_RE = /\b((?:[a-z0-9-]+\.)+(?:com|net|org|de|io|gg|ru|xyz|me|tv|co|info|biz|app|dev|link|ly|to|sh|cc|eu|uk|fr|nl|at|ch|be|pl|es|it|se|no|dk|fi|cz|us|ca|au|in|jp|so|lol|fun|site|online|shop|store|live|news|tk|ml|ga|cf|gq))\b(?:\/\S*)?/gi;
 
 /** Liefert alle Einladungs-Codes einer Nachricht. */
 export function findInviteCodes(content: string): string[] {
@@ -32,6 +32,12 @@ export function isDomainAllowed(domain: string, allowed: string[]): boolean {
     const n = normalizeDomain(a.trim());
     return n.length > 0 && (d === n || d.endsWith(`.${n}`));
   });
+}
+
+/** Links zu ausdrücklich gesperrten Websites (inkl. Subdomains, z. B. vm.tiktok.com, m.youtube.com). */
+export function findBlockedLinks(content: string, blocked: string[]): string[] {
+  if (!blocked.length) return [];
+  return findDomains(content).filter((d) => isDomainAllowed(d, blocked));
 }
 
 export function findForbiddenLinks(content: string, allowed: string[]): string[] {

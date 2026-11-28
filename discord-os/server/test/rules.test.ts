@@ -23,6 +23,25 @@ describe('Auto-Moderation: Links', () => {
   });
 });
 
+describe('Auto-Moderation: Gesperrte Websites', () => {
+  const blocked = ['tiktok.com', 'youtube.com', 'youtu.be'];
+  it('findet TikTok- und YouTube-Links in allen gängigen Formen', async () => {
+    const { findBlockedLinks } = await import('../src/bot/utils/automodRules');
+    expect(findBlockedLinks('schau https://www.tiktok.com/@user/video/123', blocked)).toEqual(['tiktok.com']);
+    expect(findBlockedLinks('https://vm.tiktok.com/ZMabc/', blocked)).toEqual(['vm.tiktok.com']);
+    expect(findBlockedLinks('https://youtu.be/dQw4w9WgXcQ', blocked)).toEqual(['youtu.be']);
+    expect(findBlockedLinks('youtu.be/dQw4w9WgXcQ ohne https', blocked)).toEqual(['youtu.be']);
+    expect(findBlockedLinks('https://m.youtube.com/shorts/abc', blocked)).toEqual(['m.youtube.com']);
+    expect(findBlockedLinks('https://music.youtube.com/watch?v=1', blocked)).toEqual(['music.youtube.com']);
+  });
+  it('lässt andere Links und normale Texte in Ruhe', async () => {
+    const { findBlockedLinks } = await import('../src/bot/utils/automodRules');
+    expect(findBlockedLinks('https://github.com/x und https://twitch.tv/y', blocked)).toEqual([]);
+    expect(findBlockedLinks('ich schaue gern youtube und tiktok', blocked)).toEqual([]);
+    expect(findBlockedLinks('https://nottiktok.com/x', blocked)).toEqual([]);
+  });
+});
+
 describe('Auto-Moderation: Wortfilter', () => {
   const match = compileWordFilter(['idiot', 'bl*d'], ['sp[a@]m+er']);
   it('findet ganze Wörter und Platzhalter', () => {

@@ -5,7 +5,7 @@ import type { AutoAction, ModuleConfig } from '../../shared/modules';
 import type { BotContext, BotModule } from '../core/types';
 import { COLORS, embed, truncate } from '../utils/embeds';
 import { getSendableChannel } from '../utils/discord';
-import { SlidingWindow, capsPercent, compileWordFilter, findForbiddenLinks, findInviteCodes } from '../utils/automodRules';
+import { SlidingWindow, capsPercent, compileWordFilter, findBlockedLinks, findForbiddenLinks, findInviteCodes } from '../utils/automodRules';
 
 const log = childLogger('automod');
 type AutomodConfig = ModuleConfig<'automod'>;
@@ -19,6 +19,7 @@ const RULE_LABELS = {
   spam: 'Spam',
   duplicate: 'Wiederholte Nachrichten',
   mentions: 'Massen-Erwähnungen',
+  blockedLinks: 'Gesperrte Website',
   links: 'Unerlaubter Link',
   invites: 'Discord-Einladung',
   badwords: 'Unerlaubtes Wort',
@@ -60,6 +61,11 @@ async function check(message: Message<true>, cfg: AutomodConfig): Promise<{ rule
       const foreign = codes.filter((c) => !own.has(c));
       if (foreign.length) return { rule: 'invites', action: cfg.invites.action, detail: foreign.join(', ') };
     }
+  }
+
+  if (cfg.blockedLinks.enabled && content) {
+    const hits = findBlockedLinks(content, cfg.blockedLinks.domains);
+    if (hits.length) return { rule: 'blockedLinks', action: cfg.blockedLinks.action, detail: hits.slice(0, 5).join(', ') };
   }
 
   if (cfg.links.enabled && content) {

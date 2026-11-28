@@ -65,6 +65,14 @@ export const automodSchema = z.object({
       action: autoActionSchema,
     })
     .prefault({}),
+  /** Links zu bestimmten Websites immer löschen (unabhängig vom Anti-Link-Filter) */
+  blockedLinks: z
+    .object({
+      enabled: z.boolean().default(false),
+      domains: z.array(z.string().min(3).max(253)).max(200).default(() => ['tiktok.com', 'youtube.com', 'youtu.be']),
+      action: autoActionSchema,
+    })
+    .prefault({}),
   links: z
     .object({
       enabled: z.boolean().default(false),
