@@ -19,4 +19,6 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           DISCORD_ROLE_ID: ${{ vars.DISCORD_ROLE_ID }}
+          TIKTOK_URL: ${{ vars.TIKTOK_URL }}
+          DISCORD_INVITE: ${{ vars.DISCORD_INVITE }}
         run: python tools/discord_notify.py

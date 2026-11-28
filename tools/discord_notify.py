@@ -16,6 +16,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Rolle, die bei jedem Update gepingt wird: Rollen-ID (Zahl), "everyone" oder leer = niemand.
 # Kann auch über die GitHub-Variable DISCORD_ROLE_ID gesetzt werden.
 ROLE_ID = "everyone"
+# Links, die in JEDER Update-Meldung stehen. Können auch über die GitHub-Variablen TIKTOK_URL und
+# DISCORD_INVITE gesetzt werden. Leer = Zeile wird weggelassen.
+TIKTOK_URL = "https://www.tiktok.com/@factory.empire1"
+DISCORD_INVITE = "https://discord.gg/xkZR7aGJG"
 
 
 EMOJIS = [("musik", "🎵"), ("vogel", "🐦"), ("wind", "🌬️"), ("geräusch", "🔊"), ("sound", "🔊"),
@@ -65,6 +69,15 @@ def build_message(info):
     else:
         links = f"🪟 🍎 **[Hier herunterladen](https://github.com/{REPO}/releases/latest)**"
     fields.append({"name": "📥 Neu dabei? Spiel herunterladen:", "value": links, "inline": False})
+    tiktok = (os.environ.get("TIKTOK_URL") or TIKTOK_URL).strip()
+    invite = (os.environ.get("DISCORD_INVITE") or DISCORD_INVITE).strip()
+    social = []
+    if tiktok:
+        social.append(f"🎵 **[TikTok: Factory Empire]({tiktok})**")
+    if invite:
+        social.append(f"💬 **[Discord-Server von Factory Empire]({invite})**")
+    if social:
+        fields.append({"name": "🔗 Folge uns & lade Freunde ein:", "value": "\n".join(social), "inline": False})
     embed = {
         "author": {"name": "FACTORY EMPIRE  ·  PATCH NOTES", "icon_url": f"{REPO_RAW}/logo.png"},
         "title": f"✨ Das ist neu in Version {version}",
