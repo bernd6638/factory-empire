@@ -1,11 +1,25 @@
 {
- "version": "2.17.0",
+ "version": "2.18.0",
  "runtime": 1,
- "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.17.0.zip",
- "sha256": "b6496e6202c2d554d82e68b830ba74e2fb78fbbdc00eb3adc50921e8c8106afd",
- "size": 8521908,
+ "url": "https://raw.githubusercontent.com/bernd6638/factory-empire/main/updates/factory_empire_app_2.18.0.zip",
+ "sha256": "e23e1c774e2239fb275e0573de49d88ae631e14ce810381d5c21d80d107e18f2",
+ "size": 8638122,
  "download_page": "https://github.com/bernd6638/factory-empire",
  "notes": [
+  [
+   "2.18.0",
+   [
+    "5 neue Produkte: Stahlrohre, LED-Lampen, Drohnen, Windräder und Satelliten – der Satellit ist jetzt das wertvollste Produkt",
+    "8 neue Forschungen, zum Beispiel Raumfahrttechnik, KI-Fabrik, Weltkonzern und ein günstiges Stromnetz für den Anfang",
+    "8 neue Erfolge – damit gibt es mehr Punkte für Skins im Shop",
+    "Schwebende Geld-Zahlen über Verkäufern zeigen, was gerade verdient wird (abschaltbar unter Optionen » Anzeige)",
+    "Fertige Produkte sprühen kleine Funken in der Farbe der Ware",
+    "Mehr Produktion: Ausgebaute Maschinen, Miner und Verkäufer verlieren keine Zeit mehr zwischen zwei Arbeitsgängen – voll ausgebaute Fabriken schaffen oft über 50 % mehr",
+    "Große Fabriken laufen flüssiger: Die Simulation rechnet deutlich weniger pro Takt",
+    "Beim Abreißen landen Waren aus Maschinen und Bändern im Lager, statt verloren zu gehen",
+    "Im Markt passen wieder alle Waren auf eine Seite"
+   ]
+  ],
   [
    "2.17.0",
    [
@@ -49,12 +63,6 @@
   ],
   [
    "2.15.3",
-   [
-    "Kleine Verbesserungen und Fehlerbehebungen"
-   ]
-  ],
-  [
-   "2.15.2",
    [
     "Kleine Verbesserungen und Fehlerbehebungen"
    ]
